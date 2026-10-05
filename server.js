@@ -212,6 +212,30 @@ try {
   console.error("SUBSCRIPTION PLAN MIGRATION ERROR:", error);
 }
 
+/* ---------- plan pricing + paid-plan support ---------- */
+const PRICE_PER_MEAL_DAY_INR = 300;      // custom plan: 1 meal/day for 1 day
+const MEALS_PER_PERSON_PER_DAY = 5;      // breakfast, 2 snacks, lunch, dinner
+const FAMILY_PEOPLE = 4;
+const paidPlanAllowance = sub => Number(sub && sub.meals_per_day) || MEALS_PER_PERSON_PER_DAY;
+
+try {
+  const addCol = (table, name, ddl) => {
+    const cols = db.prepare(`PRAGMA table_info(${table})`).all().map(c => c.name);
+    if (!cols.includes(name)) db.exec(`ALTER TABLE ${table} ADD COLUMN ${name} ${ddl}`);
+  };
+  addCol("subscriptions", "amount_paise", "INTEGER");
+  addCol("subscriptions", "meals_per_day", "INTEGER");     // meals/day included in a paid plan
+  addCol("orders", "plan_covered", "INTEGER NOT NULL DEFAULT 0");  // 1 = meal included in a paid plan
+
+  // Prices are in rupees. Only set when empty, so a later edit in the database is never overwritten.
+  db.prepare("UPDATE subscription_plans SET price = 45000 WHERE name = 'EatRight Plus' AND price IS NULL").run();
+  db.prepare("UPDATE subscription_plans SET price = 540000 WHERE name LIKE 'Family Plan%' AND price IS NULL").run();
+  db.prepare(`INSERT OR IGNORE INTO subscription_plans (name, duration_days, price, currency, is_trial, active)
+              VALUES ('Custom Plan', 1, NULL, 'INR', 0, 1)`).run();
+} catch (error) {
+  console.error("PLAN PRICING MIGRATION ERROR:", error);
+}
+
 /* ---------- delivery ordering: EatRight menu library ----------
    The dishes live in ./menu/*.txt (written for EatRight, tagged by diet and allergen).
    They are copied into menu_items once, so the shop, prices and admin edits keep working.
@@ -456,6 +480,8 @@ function getCurrentSubscription(
         s.payment_status,
         s.payment_provider,
         s.payment_reference,
+        s.meals_per_day,
+        s.amount_paise,
         p.id AS plan_id,
         p.name AS plan_name,
         p.duration_days,
@@ -1406,6 +1432,8 @@ app.get(
             is_trial
           FROM subscription_plans
           WHERE active = 1
+            AND name <> 'Custom Plan'
+            AND (price IS NOT NULL OR is_trial = 1)
           ORDER BY duration_days ASC
         `)
         .all();
@@ -1468,85 +1496,112 @@ app.get(
 );
 
 
-/*
-   Paid subscription activation is deliberately not wired
-   until a real payment provider is selected.
-*/
+/* ---------- paid subscriptions (Razorpay) ----------
+   Flow: checkout creates a PENDING subscription + a Razorpay order -> the browser pays ->
+   verify-payment (signature checked) or the webhook activates it. Nothing is active until paid. */
 
-app.post(
-  "/api/subscription/checkout",
-  (req, res) => {
+function activatePaidSubscription(subId, paymentId) {
+  return db.transaction(() => {
+    const sub = db.prepare("SELECT * FROM subscriptions WHERE id = ?").get(subId);
+    if (!sub) return null;
+    if (sub.status === "active" && sub.payment_status === "paid") return sub;   // already done (verify + webhook both fire)
+    if (!["pending", "cancelled"].includes(sub.status)) return null;
+    const length = new Date(sub.ends_at) - new Date(sub.starts_at);              // plan length set at checkout
+    const now = new Date();
+    // The paid plan replaces a running trial straight away.
+    db.prepare("UPDATE subscriptions SET status = 'expired', ends_at = ? WHERE user_id = ? AND id <> ? AND status IN ('trial','active')")
+      .run(now.toISOString(), sub.user_id, subId);
+    db.prepare("UPDATE subscriptions SET status = 'active', starts_at = ?, ends_at = ?, payment_status = 'paid', payment_reference = ? WHERE id = ?")
+      .run(now.toISOString(), new Date(now.getTime() + length).toISOString(), paymentId ? String(paymentId) : null, subId);
+    db.prepare("UPDATE payments SET status = 'paid' WHERE subscription_id = ? AND status <> 'paid'").run(subId);
+    return db.prepare("SELECT * FROM subscriptions WHERE id = ?").get(subId);
+  })();
+}
 
-    const user =
-      requireUser(
-        req,
-        res
-      );
+app.post("/api/subscription/checkout", async (req, res) => {
+  const user = requireUser(req, res);
+  if (!user) return;
+  if (!razorpayEnabled) return res.status(503).json({ error: "Online payment isn't available right now." });
 
-    if (!user) {
-      return;
-    }
-
-
-    const planId =
-      Number(
-        req.body.plan_id
-      );
-
-
-    const plan =
-      db
-        .prepare(`
-          SELECT
-            id,
-            name,
-            duration_days,
-            price,
-            currency,
-            is_trial
-          FROM subscription_plans
-          WHERE id = ?
-            AND active = 1
-        `)
-        .get(
-          planId
-        );
-
-
-    if (!plan) {
-
-      return res
-        .status(404)
-        .json({
-          error:
-            "Subscription plan not found."
-        });
-
-    }
-
-
-    if (plan.is_trial) {
-
-      return res
-        .status(400)
-        .json({
-          error:
-            "The free trial is started automatically after onboarding."
-        });
-
-    }
-
-
-    res
-      .status(501)
-      .json({
-        error:
-          "Payments are not connected yet. This plan is ready for checkout once a payment provider is added."
-      });
-
+  const current = getCurrentSubscription(user.id);
+  if (current && !current.is_trial) {
+    return res.status(409).json({ error: `You already have an active ${current.plan_name} plan.` });
   }
-);
 
+  const body = req.body || {};
+  let plan, days, mealsPerDay, amountRupees;
+
+  if (body.custom) {
+    const meals = Number(body.custom.meals), d = Number(body.custom.days);
+    if (!Number.isInteger(meals) || meals < 1 || meals > 5) return res.status(400).json({ error: "Choose 1 to 5 meals per day." });
+    if (!Number.isInteger(d) || d < 1 || d > 365) return res.status(400).json({ error: "Choose 1 to 365 days." });
+    plan = db.prepare("SELECT id, name FROM subscription_plans WHERE name = 'Custom Plan' AND active = 1").get();
+    if (!plan) return res.status(404).json({ error: "Custom plan is not available." });
+    days = d; mealsPerDay = meals;
+    amountRupees = PRICE_PER_MEAL_DAY_INR * meals * d;          // price is always worked out here, never taken from the browser
+  } else {
+    plan = db.prepare("SELECT id, name, duration_days, price, is_trial FROM subscription_plans WHERE id = ? AND active = 1").get(Number(body.plan_id));
+    if (!plan) return res.status(404).json({ error: "Subscription plan not found." });
+    if (plan.is_trial) return res.status(400).json({ error: "The free trial is started automatically after onboarding." });
+    if (!(Number(plan.price) > 0)) return res.status(400).json({ error: "This plan has no price set yet." });
+    days = plan.duration_days;
+    amountRupees = Number(plan.price);
+    mealsPerDay = /family/i.test(plan.name) ? FAMILY_PEOPLE * MEALS_PER_PERSON_PER_DAY : MEALS_PER_PERSON_PER_DAY;
+  }
+
+  const amountPaise = Math.round(amountRupees * 100);
+  const startsAt = new Date();
+  const endsAt = new Date(startsAt.getTime() + days * 86400000);
+
+  // Earlier unpaid attempts are closed so only one checkout is open at a time.
+  db.prepare("UPDATE subscriptions SET status = 'cancelled' WHERE user_id = ? AND status = 'pending'").run(user.id);
+  const subId = Number(db.prepare(`INSERT INTO subscriptions
+      (user_id, plan_id, status, starts_at, ends_at, trial, payment_status, payment_provider, amount_paise, meals_per_day)
+      VALUES (?, ?, 'pending', ?, ?, 0, 'pending', 'razorpay', ?, ?)`)
+    .run(user.id, plan.id, startsAt.toISOString(), endsAt.toISOString(), amountPaise, mealsPerDay).lastInsertRowid);
+
+  try {
+    const created = await rzpRequest("/orders", "POST", {
+      amount: amountPaise, currency: "INR",
+      receipt: `SUB-${subId}-${Date.now().toString(36)}`,
+      notes: { subscription_id: String(subId), user_id: String(user.id), plan: plan.name }
+    });
+    db.prepare(`INSERT INTO payments (user_id, subscription_id, amount, currency, status, provider, provider_reference)
+                VALUES (?, ?, ?, 'INR', 'pending', 'razorpay', ?)`).run(user.id, subId, amountPaise / 100, created.id);
+    res.json({
+      success: true, subscription_id: subId,
+      payment: {
+        key_id: RZP_KEY_ID, order_id: created.id, amount: amountPaise, currency: "INR", name: "EatRight",
+        description: body.custom ? `Custom plan: ${mealsPerDay} meals/day for ${days} days` : plan.name
+      }
+    });
+  } catch (error) {
+    db.prepare("DELETE FROM subscriptions WHERE id = ?").run(subId);   // nothing was charged
+    console.error("RAZORPAY SUBSCRIPTION ERROR:", error.message);
+    res.status(502).json({ error: "Online payment could not be started. Please try again." });
+  }
+});
+
+/* The browser reports a finished payment; it is only believed if the signature matches our secret. */
+app.post("/api/subscription/verify-payment", (req, res) => {
+  const user = requireUser(req, res);
+  if (!user) return;
+  if (!razorpayEnabled) return res.status(503).json({ error: "Online payment isn't available right now." });
+  const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body || {};
+  if (![razorpay_order_id, razorpay_payment_id, razorpay_signature].every(v => typeof v === "string" && v.length > 0 && v.length <= 100)) {
+    return res.status(400).json({ error: "Payment details are missing." });
+  }
+  const row = db.prepare("SELECT subscription_id FROM payments WHERE provider_reference = ? AND user_id = ? AND subscription_id IS NOT NULL")
+    .get(razorpay_order_id, user.id);
+  if (!row) return res.status(404).json({ error: "Payment not found." });
+  const expected = hmacHex(RZP_KEY_SECRET, `${razorpay_order_id}|${razorpay_payment_id}`);
+  if (!safeEqualHex(expected, razorpay_signature)) {
+    return res.status(400).json({ error: "Payment could not be verified. If money was deducted, contact us and we will activate your plan." });
+  }
+  const sub = activatePaidSubscription(row.subscription_id, razorpay_payment_id);
+  if (!sub) return res.status(409).json({ error: "This plan could not be activated. Please contact support." });
+  res.json({ success: true });
+});
 
 /* ---------- date-based progress ---------- */
 
@@ -1970,6 +2025,17 @@ app.post("/api/razorpay/webhook", (req, res) => {
       db.prepare("UPDATE orders SET payment_status = 'failed' WHERE id = ? AND payment_status = 'pending'").run(row.order_id);
     }
   }
+  if (!row && rzpOrderId) {
+    const sp = db.prepare("SELECT subscription_id FROM payments WHERE provider_reference = ? AND subscription_id IS NOT NULL").get(rzpOrderId);
+    if (sp) {
+      if (event.event === "payment.captured" || event.event === "order.paid") {
+        activatePaidSubscription(sp.subscription_id, payment && payment.id);
+      } else if (event.event === "payment.failed") {
+        db.prepare("UPDATE payments SET status = 'failed' WHERE subscription_id = ? AND status = 'pending'").run(sp.subscription_id);
+        db.prepare("UPDATE subscriptions SET payment_status = 'failed' WHERE id = ? AND status = 'pending'").run(sp.subscription_id);
+      }
+    }
+  }
   res.json({ received: true });
 });
 // RAZORPAY-END
@@ -1985,10 +2051,15 @@ app.get("/api/orders", (req, res) => {
 app.post("/api/orders", async (req, res) => {
   const user = requireUser(req, res); if (!user) return;
   try {
-    const {items,payment_method,address,phone,notes=""} = req.body || {};
+    const {items,address,phone,notes=""} = req.body || {};
+    // Paid plans (Plus, Family, Custom) include their meals: no payment, no delivery fee.
+    // Only trial users (and anyone with no plan) pay per meal.
+    const sub = getCurrentSubscription(user.id);
+    const covered = !!(sub && !sub.is_trial);
+    const payment_method = covered ? 'online' : (req.body || {}).payment_method;
     if (!Array.isArray(items) || !items.length || items.length > 30) return res.status(400).json({error:"Add at least one menu item."});
     if (!['cod','online'].includes(payment_method)) return res.status(400).json({error:"Choose a valid payment method."});
-    if (payment_method === 'online' && !razorpayEnabled) return res.status(400).json({error:"Online payment isn't available right now. Please choose cash on delivery."});
+    if (payment_method === 'online' && !covered && !razorpayEnabled) return res.status(400).json({error:"Online payment isn't available right now. Please choose cash on delivery."});
     const cleanAddress=String(address||'').trim(), cleanPhone=String(phone||'').trim();
     if (cleanAddress.length < 10 || cleanAddress.length > 500) return res.status(400).json({error:"Enter a complete delivery address."});
     if (!/^[+\d()\-\s]{8,20}$/.test(cleanPhone)) return res.status(400).json({error:"Enter a valid contact number."});
@@ -2004,20 +2075,32 @@ app.post("/api/orders", async (req, res) => {
       return {...item,quantity};
     });
     if (fetched.some(x=>x.quantity>30)) return res.status(400).json({error:"Maximum quantity per item is 30."});
-    const subtotal=fetched.reduce((sum,x)=>sum+x.price_paise*x.quantity,0);
-    const deliveryFee=4900; // ₹49 flat pilot-area delivery fee
+    if (covered) {
+      // Daily allowance: Plus = 5 meals, Family = 20 (4 people x 5), Custom = the meals/day that was bought.
+      const allowance = paidPlanAllowance(sub);
+      const qty = fetched.reduce((n,x)=>n+x.quantity,0);
+      const used = db.prepare(`SELECT COALESCE(SUM(oi.quantity),0) AS n FROM orders o JOIN order_items oi ON oi.order_id=o.id
+        WHERE o.user_id=? AND o.plan_covered=1 AND o.status<>'cancelled'
+          AND date(o.created_at,'+5 hours','+30 minutes') = date('now','+5 hours','+30 minutes')`).get(user.id).n;
+      if (used + qty > allowance) {
+        return res.status(409).json({error:`Your plan includes ${allowance} meal${allowance===1?'':'s'} per day and you have already ordered ${used} today.`});
+      }
+    }
+    const subtotal=covered?0:fetched.reduce((sum,x)=>sum+x.price_paise*x.quantity,0);
+    const deliveryFee=covered?0:4900; // ₹49 flat pilot-area delivery fee (paid plans: free)
     const total=subtotal+deliveryFee;
     const orderCode=`ER-${Date.now().toString(36).toUpperCase()}-${crypto.randomBytes(2).toString('hex').toUpperCase()}`;
     const create=db.transaction(()=>{
       const result=db.prepare(`INSERT INTO orders (order_code,user_id,status,payment_method,payment_status,subtotal_paise,delivery_fee_paise,total_paise,address,customer_phone,notes) VALUES (?,?,?,?,?,?,?,?,?,?,?)`)
-        .run(orderCode,user.id,'placed',payment_method,'pending',subtotal,deliveryFee,total,cleanAddress,cleanPhone,String(notes).trim().slice(0,500));
+        .run(orderCode,user.id,'placed',payment_method,covered?'paid':'pending',subtotal,deliveryFee,total,cleanAddress,cleanPhone,String(notes).trim().slice(0,500));
       const add=db.prepare("INSERT INTO order_items (order_id,menu_item_id,item_name,unit_price_paise,quantity) VALUES (?,?,?,?,?)");
       fetched.forEach(x=>add.run(result.lastInsertRowid,x.id,x.name,x.price_paise,x.quantity));
+      if (covered) db.prepare("UPDATE orders SET plan_covered=1 WHERE id=?").run(result.lastInsertRowid);
       return result.lastInsertRowid;
     });
     const id=create();
     let payment=null;
-    if (payment_method==='online') {
+    if (payment_method==='online' && !covered) {
       try {
         payment=await ensureRazorpayOrder({id,order_code:orderCode,total_paise:total});
       } catch(err) {
@@ -2027,7 +2110,7 @@ app.post("/api/orders", async (req, res) => {
         return res.status(502).json({error:"Online payment could not be started. Please try again or choose cash on delivery."});
       }
     }
-    res.status(201).json({success:true,id,order_code:orderCode,payment_method,payment,message:payment_method==='online'?'Order saved. Complete the payment to confirm it.':'Order placed. Pay cash on delivery.'});
+    res.status(201).json({success:true,id,order_code:orderCode,payment_method,payment,plan_covered:covered,message:covered?'Order placed. It is included in your plan, so there is nothing to pay.':payment_method==='online'?'Order saved. Complete the payment to confirm it.':'Order placed. Pay cash on delivery.'});
   } catch(error) { res.status(400).json({error:error.message||"Could not place order."}); }
 });
 app.patch("/api/admin/orders/:id/status", (req,res)=>{
