@@ -1544,6 +1544,13 @@ async function openMealOptions(index) {
 
 }
 
+/* True on a paid plan (Plus / Family / Custom): meals are included, so no payment is asked for.
+   Trial users still pay per meal. The server enforces the same rule. */
+function isPlanCovered() {
+  const s = userData && userData.subscription;
+  return !!(s && s.plan_name && s.status === "active" && !s.is_trial && !s.trial);
+}
+
 /* Step 2: delivery details for the dish the customer picked. */
 async function openMealDialog(index, dish) {
 
@@ -1554,6 +1561,25 @@ async function openMealDialog(index, dish) {
   const fee = 4900;
 
   const total = Number(dish.price_paise || 0) + fee;
+
+  const covered = isPlanCovered();
+
+  const paymentFieldHTML = covered ? "" : `<label>Payment method
+            <select name="payment_method">
+              <option value="cod">Cash on delivery</option>
+              ${onlinePaymentsEnabled?'<option value="online">Online payment (UPI, cards, netbanking)</option>':''}
+            </select>
+          </label>`;
+
+  const totalHTML = covered
+    ? `<div class="meal-dialog-total">
+            <span>Included in your ${escapeHTML(userData.subscription.plan_name)} plan</span>
+            <strong>No payment needed</strong>
+          </div>`
+    : `<div class="meal-dialog-total">
+            <span>${escapeHTML(rupees(dish.price_paise))} meal + ${escapeHTML(rupees(fee))} delivery</span>
+            <strong>${escapeHTML(rupees(total))}</strong>
+          </div>`;
 
   const contains = dish.allergens
     ? dish.allergens.split("").map(c => ALLERGEN_LABELS[c] || c).join(", ")
@@ -1589,17 +1615,9 @@ async function openMealDialog(index, dish) {
           <label>Delivery notes (optional)
             <input name="notes" maxlength="500" placeholder="Landmark or instructions">
           </label>
-          <label>Payment method
-            <select name="payment_method">
-              <option value="cod">Cash on delivery</option>
-              ${onlinePaymentsEnabled?'<option value="online">Online payment (UPI, cards, netbanking)</option>':''}
-            </select>
-          </label>
+          ${paymentFieldHTML}
 
-          <div class="meal-dialog-total">
-            <span>${escapeHTML(rupees(dish.price_paise))} meal + ${escapeHTML(rupees(fee))} delivery</span>
-            <strong>${escapeHTML(rupees(total))}</strong>
-          </div>
+          ${totalHTML}
 
           <p class="meal-dialog-error" id="meal-dialog-error" role="alert" hidden></p>
 
@@ -3282,6 +3300,11 @@ async function finishSetup() {
    SUBSCRIPTION VIEW
    ========================================================= */
 
+const PLAN_PRICES = { plus: 45000, family: 540000, perMealDay: 300 };   // display only: the server works out the real charge
+const formatINR = n => new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(n);
+const customSummaryText = (meals, days) =>
+  `${meals} meal${meals === 1 ? "" : "s"} a day for ${days} day${days === 1 ? "" : "s"} · ${formatINR(meals * days * PLAN_PRICES.perMealDay)}`;
+
 function subscriptionView() {
   const upgrading = subscriptionUpgradeMode || isPlanExpired();
   return `<main class="page-shell">
@@ -3293,23 +3316,23 @@ function subscriptionView() {
         <button type="button" class="primary-button" onclick="chooseSubscription('trial')">Start 3-day trial</button>
       </article>`}
       <article class="subscription-card"><div class="subscription-icon">⚡</div><h2>EatRight Plus</h2>
-        <p class="subscription-price">1 month · 30 days</p>
+        <p class="subscription-price">1 month · 30 days</p><p class="subscription-amount">${formatINR(PLAN_PRICES.plus)}</p>
         <ul><li>Full daily meal plan</li><li>Detailed nutrition targets</li><li>Progress tracking</li><li>Complete workout journey</li></ul>
         <button type="button" class="primary-button" onclick="chooseSubscription('plus')">Choose Plus</button>
       </article>
       <article class="subscription-card family-plan-card"><div class="subscription-badge">FAMILY</div>
-        <div class="subscription-icon">👨‍👩‍👧‍👦</div><h2>Family Plan</h2><p class="subscription-price">4 people · 90 days</p>
+        <div class="subscription-icon">👨‍👩‍👧‍👦</div><h2>Family Plan</h2><p class="subscription-price">4 people · 90 days</p><p class="subscription-amount">${formatINR(PLAN_PRICES.family)}</p>
         <ul><li>For up to 4 people</li><li>90 days of access</li><li>Personalized nutrition plans</li><li>Workout and progress tracking</li></ul>
         <button type="button" class="primary-button" onclick="chooseSubscription('family')">Choose Family Plan</button>
       </article>
       <article class="subscription-card"><div class="subscription-icon">🛠️</div><h2>Custom Plan</h2>
-        <p class="subscription-price">Build your own schedule</p>
+        <p class="subscription-price">Build your own schedule · ${formatINR(PLAN_PRICES.perMealDay)} per meal per day</p>
         <label class="custom-plan-field">Number of meals per day
           <input id="custom-meals" type="number" min="1" max="5" value="3" oninput="updateCustomPlanSummary()"></label>
         <label class="custom-plan-field">Number of days
           <input id="custom-days" type="number" min="1" max="365" value="14" oninput="updateCustomPlanSummary()"></label>
-        <p class="custom-plan-summary" id="custom-plan-summary">3 meals a day for 14 days</p>
-        <button type="button" class="primary-button" onclick="chooseSubscription('custom')">Continue with custom plan</button>
+        <p class="custom-plan-summary" id="custom-plan-summary">${customSummaryText(3, 14)}</p>
+        <button type="button" class="primary-button" onclick="chooseSubscription('custom')">Pay &amp; start custom plan</button>
       </article>
     </section></main>`;
 }
@@ -3317,7 +3340,7 @@ function updateCustomPlanSummary() {
   const meals = Math.max(1, Math.min(5, Number(document.getElementById("custom-meals")?.value || 3)));
   const days = Math.max(1, Math.min(365, Number(document.getElementById("custom-days")?.value || 14)));
   const summary = document.getElementById("custom-plan-summary");
-  if (summary) summary.textContent = `${meals} meals a day for ${days} days`;
+  if (summary) summary.textContent = customSummaryText(meals, days);
 }
 
 
@@ -3363,10 +3386,7 @@ async function chooseSubscription(plan) {
       )
     );
 
-    showMessage(
-      `Custom plan: ${meals} meals per day for ${days} days. Custom checkout is not connected yet.`,
-      "info"
-    );
+    await startSubscriptionCheckout({ custom: { meals, days } });
 
     return;
   }
@@ -3423,33 +3443,7 @@ async function chooseSubscription(plan) {
       return;
     }
 
-    const response = await fetch("/api/subscription/checkout", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        plan_id: Number(selectedPlan.id)
-      })
-    });
-
-    const data = await response.json().catch(() => ({}));
-
-    if (!response.ok) {
-      showMessage(
-        data.error || "Checkout is not available yet.",
-        "error"
-      );
-
-      return;
-    }
-
-    if (data.url) {
-      window.location.href = data.url;
-      return;
-    }
-
-    showMessage("Subscription selected.", "success");
+    await startSubscriptionCheckout({ plan_id: Number(selectedPlan.id) });
 
   } catch (error) {
     console.error("SUBSCRIPTION ERROR:", error);
@@ -3458,6 +3452,46 @@ async function chooseSubscription(plan) {
       "Could not start checkout. Please try again.",
       "error"
     );
+  }
+}
+
+
+let subscriptionPayBusy = false;
+
+/* Starts Razorpay for a paid plan. body is { plan_id } or { custom: { meals, days } }. */
+async function startSubscriptionCheckout(body) {
+  if (subscriptionPayBusy) return;
+  subscriptionPayBusy = true;
+  try {
+    const response = await fetch("/api/subscription/checkout", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body)
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      showMessage(data.error || "Checkout is not available yet.", "error");
+      return;
+    }
+    const outcome = await startRazorpayPayment(
+      data.subscription_id, data.payment, {}, "/api/subscription/verify-payment"
+    );
+    if (outcome.paid) {
+      await refreshMe();
+      subscriptionUpgradeMode = false;
+      view = "plan";
+      render();
+      showMessage("Payment received. Your plan is now active. Welcome to EatRight!", "success");
+    } else if (outcome.error) {
+      showMessage(outcome.error, "error");
+    } else {
+      showMessage("Payment was not completed. You have not been charged.", "info");
+    }
+  } catch (error) {
+    console.error("SUBSCRIPTION PAYMENT ERROR:", error);
+    showMessage("Could not start checkout. Please try again.", "error");
+  } finally {
+    subscriptionPayBusy = false;
   }
 }
 
@@ -4359,7 +4393,7 @@ function loadRazorpayScript() {
 }
 
 /* Opens Razorpay Checkout. Resolves { paid:true } only after the server has verified the payment. */
-async function startRazorpayPayment(orderId, session, prefill = {}) {
+async function startRazorpayPayment(orderId, session, prefill = {}, verifyUrl = null) {
   await loadRazorpayScript();
   return new Promise(resolve => {
     const checkout = new window.Razorpay({
@@ -4372,7 +4406,7 @@ async function startRazorpayPayment(orderId, session, prefill = {}) {
       prefill,
       handler: async (response) => {
         try {
-          const verify = await fetch(`/api/orders/${orderId}/verify-payment`, {
+          const verify = await fetch(verifyUrl || `/api/orders/${orderId}/verify-payment`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -4434,8 +4468,13 @@ function shopView() {
   const cartRows=Object.entries(shopCart).map(([id,qty])=>{const item=shopMenu.find(x=>x.id===Number(id));return item?`<div class="shop-cart-row"><span>${escapeShop(item.name)} × ${qty}</span><strong>${rupees(item.price_paise*qty)}</strong><button type="button" class="text-button" onclick="removeShopItem(${id})">Remove</button></div>`:''}).join('');
   const subtotal=Object.entries(shopCart).reduce((sum,[id,qty])=>sum+(shopMenu.find(x=>x.id===Number(id))?.price_paise||0)*qty,0);
   const fee=subtotal?4900:0;
-  const orders=shopOrders.map(o=>`<article class="shop-order"><div class="shop-order-head"><strong>${escapeShop(o.order_code)}</strong><span class="order-status status-${o.status}">${o.status.replaceAll('_',' ')}</span></div><p>${o.items.map(i=>`${escapeShop(i.item_name)} × ${i.quantity}`).join(' · ')}</p><small>${o.payment_method==='cod'?'Cash on delivery':'Online payment ('+o.payment_status+')'} · ${rupees(o.total_paise)} · ${new Date(o.created_at+'Z').toLocaleString()}</small>${(!isShopAdmin()&&o.payment_method==='online'&&['pending','failed'].includes(o.payment_status)&&o.status!=='cancelled')?`<button class="btn primary" onclick="payShopOrder(${o.id})">Pay now</button>`:''}${isShopAdmin()?`<div class="shop-admin-actions"><select id="order-status-${o.id}">${['confirmed','preparing','ready_for_pickup','out_for_delivery','delivered','cancelled'].map(st=>`<option value="${st}" ${st===o.status?'selected':''}>${st.replaceAll('_',' ')}</option>`).join('')}</select><button class="btn secondary" onclick="updateShopOrder(${o.id})">Update status</button><small>Customer: ${escapeShop(o.customer_email||'')}</small></div>`:''}</article>`).join('');
-  return `<main class="shop-page"><div class="shop-heading"><div><p class="eyebrow">EATRIGHT KITCHEN</p><h1>Order balanced meals</h1><p>Freshly prepared by our kitchen and delivered in our pilot service area.</p></div><button class="btn secondary" onclick="goBackFromShop()">Back to my plan</button></div><div class="shop-layout"><section class="shop-menu"><h2>Today's menu</h2><div class="shop-items">${rows||'<p>Menu is being updated. Please check back soon.</p>'}</div></section><aside class="shop-checkout"><h2>Your cart</h2>${cartRows||'<p class="muted">Your cart is empty. Add a meal to get started.</p>'}<div class="shop-total"><span>Subtotal</span><strong>${rupees(subtotal)}</strong></div><div class="shop-total"><span>Delivery fee</span><strong>${rupees(fee)}</strong></div><div class="shop-total shop-grand"><span>Total</span><strong>${rupees(subtotal+fee)}</strong></div><form data-act="checkout" class="shop-form"><label>Delivery address<textarea name="address" required minlength="10" maxlength="500" placeholder="House/flat, street, area, city, PIN code"></textarea></label><label>Contact number<input name="phone" required type="tel" pattern="[+0-9()\\s-]{8,20}" placeholder="Phone number"></label><label>Delivery notes (optional)<input name="notes" maxlength="500" placeholder="Landmark or instructions"></label><label>Payment method<select name="payment_method"><option value="cod">Cash on delivery</option>${onlinePaymentsEnabled?'<option value="online">Online payment (UPI, cards, netbanking)</option>':''}</select></label><button class="btn primary" type="submit" ${subtotal?'':'disabled'}>Place order · ${rupees(subtotal+fee)}</button><small>Ordering is currently a pilot. A third-party courier connection will be configured before live fulfilment.</small></form></aside></div><section class="shop-order-history"><h2>${isShopAdmin()?'All customer orders':'Your orders'}</h2>${orders||'<p class="muted">No orders yet.</p>'}</section></main>`;
+  const covered=isPlanCovered();
+  const totalsHTML=covered
+    ? '<div class="shop-total shop-grand"><span>Included in your plan</span><strong>No payment needed</strong></div>'
+    : `<div class="shop-total"><span>Subtotal</span><strong>${rupees(subtotal)}</strong></div><div class="shop-total"><span>Delivery fee</span><strong>${rupees(fee)}</strong></div><div class="shop-total shop-grand"><span>Total</span><strong>${rupees(subtotal+fee)}</strong></div>`;
+  const paymentLabel=covered ? '' : '<label>Payment method<select name="payment_method"><option value="cod">Cash on delivery</option>'+(onlinePaymentsEnabled?'<option value="online">Online payment (UPI, cards, netbanking)</option>':'')+'</select></label>';
+  const orders=shopOrders.map(o=>`<article class="shop-order"><div class="shop-order-head"><strong>${escapeShop(o.order_code)}</strong><span class="order-status status-${o.status}">${o.status.replaceAll('_',' ')}</span></div><p>${o.items.map(i=>`${escapeShop(i.item_name)} × ${i.quantity}`).join(' · ')}</p><small>${o.plan_covered?'Included in your plan':((o.payment_method==='cod'?'Cash on delivery':'Online payment ('+o.payment_status+')')+' · '+rupees(o.total_paise))} · ${new Date(o.created_at+'Z').toLocaleString()}</small>${(!isShopAdmin()&&o.payment_method==='online'&&['pending','failed'].includes(o.payment_status)&&o.status!=='cancelled')?`<button class="btn primary" onclick="payShopOrder(${o.id})">Pay now</button>`:''}${isShopAdmin()?`<div class="shop-admin-actions"><select id="order-status-${o.id}">${['confirmed','preparing','ready_for_pickup','out_for_delivery','delivered','cancelled'].map(st=>`<option value="${st}" ${st===o.status?'selected':''}>${st.replaceAll('_',' ')}</option>`).join('')}</select><button class="btn secondary" onclick="updateShopOrder(${o.id})">Update status</button><small>Customer: ${escapeShop(o.customer_email||'')}</small></div>`:''}</article>`).join('');
+  return `<main class="shop-page"><div class="shop-heading"><div><p class="eyebrow">EATRIGHT KITCHEN</p><h1>Order balanced meals</h1><p>Freshly prepared by our kitchen and delivered in our pilot service area.</p></div><button class="btn secondary" onclick="goBackFromShop()">Back to my plan</button></div><div class="shop-layout"><section class="shop-menu"><h2>Today's menu</h2><div class="shop-items">${rows||'<p>Menu is being updated. Please check back soon.</p>'}</div></section><aside class="shop-checkout"><h2>Your cart</h2>${cartRows||'<p class="muted">Your cart is empty. Add a meal to get started.</p>'}${totalsHTML}<form data-act="checkout" class="shop-form"><label>Delivery address<textarea name="address" required minlength="10" maxlength="500" placeholder="House/flat, street, area, city, PIN code"></textarea></label><label>Contact number<input name="phone" required type="tel" pattern="[+0-9()\\s-]{8,20}" placeholder="Phone number"></label><label>Delivery notes (optional)<input name="notes" maxlength="500" placeholder="Landmark or instructions"></label>${paymentLabel}<button class="btn primary" type="submit" ${subtotal?'':'disabled'}>${covered?'Deliver this order':'Place order · '+rupees(subtotal+fee)}</button><small>Ordering is currently a pilot. A third-party courier connection will be configured before live fulfilment.</small></form></aside></div><section class="shop-order-history"><h2>${isShopAdmin()?'All customer orders':'Your orders'}</h2>${orders||'<p class="muted">No orders yet.</p>'}</section></main>`;
 }
 function escapeShop(value){return String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function isShopAdmin(){return String(me?.email||'').toLowerCase()==='admin@eatright.co';}
@@ -5044,7 +5083,7 @@ function adminDetailHTML() {
         <article class="admin-order">
           <div class="admin-order-head"><strong>${adminEsc(o.order_code)}</strong><span class="admin-pill">${adminEsc(String(o.status).replaceAll("_", " "))}</span></div>
           <p>${o.items.map((i) => adminEsc(i.item_name) + " × " + Number(i.quantity)).join(" · ")}</p>
-          <small>${o.payment_method === "cod" ? "Cash on delivery" : "Online payment"} (${adminEsc(o.payment_status)}) · ${adminRupees(o.total_paise)} · ${adminDate(o.created_at)}</small><br>
+          <small>${o.plan_covered ? "Included in customer's plan" : (o.payment_method === "cod" ? "Cash on delivery" : "Online payment") + " (" + adminEsc(o.payment_status) + ") · " + adminRupees(o.total_paise)} · ${adminDate(o.created_at)}</small><br>
           <small>${adminEsc(o.address)} · ${adminEsc(o.customer_phone)}${o.notes ? " · Notes: " + adminEsc(o.notes) : ""}</small>
         </article>`).join("")
     : '<p class="muted">No orders.</p>';
