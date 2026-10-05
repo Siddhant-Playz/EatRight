@@ -1,0 +1,19 @@
+{
+  "name": "stride",
+  "version": "1.0.0",
+  "description": "Stride fitness and meal plan",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "better-sqlite3": "^12.0.0",
+    "express": "^5.0.0"
+  },
+  "allowScripts": {
+    "better-sqlite3@12.11.1": true
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
