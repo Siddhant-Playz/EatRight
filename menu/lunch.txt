@@ -1,0 +1,80 @@
+# name|description|kcal|protein_g|carbs_g|diet|allergens|cuisine
+Rajma with Brown Rice and Kachumber|Kidney beans in a tomato-onion gravy with brown rice and a fresh salad|560|21|96|0|-|NI
+Chole with Roti and Salad|Spiced chickpea curry with two whole-wheat rotis and onion-cucumber salad|580|22|90|0|G|NI
+Sambar Rice with Beans Poriyal|One-pot sambar rice with a lightly stir-fried green bean poriyal|520|16|90|0|-|SI
+Dal Tadka with Jowar Roti and Bhindi|Tempered yellow dal, sorghum roti and dry-spiced okra|540|20|82|0|-|WI
+Lemon Rice with Chana Sundal|Tangy lemon rice with peanuts and a warm chickpea sundal|540|17|88|0|P|SI
+Millet Vegetable Pulao with Soya Chunks|Fragrant millet pulao with vegetables and soya chunks|560|26|82|0|S|NI
+Soya Chunk Curry with Phulka|Protein-rich soya curry in a light onion-tomato gravy with phulkas|570|34|70|0|GS|NI
+Baingan Bharta with Bajra Roti|Smoky mashed aubergine with pearl-millet roti|520|13|84|0|-|NI
+Palak Tofu with Brown Rice|Tofu cubes simmered in spinach gravy with brown rice|560|28|74|0|S|NI
+Masoor Dal with Rice and Cabbage Thoran|Red lentil dal, steamed rice and a coconut cabbage stir-fry|530|20|90|0|-|SI
+Quinoa Buddha Bowl with Tahini|Quinoa, roasted chickpeas, greens and vegetables with lemon-tahini dressing|580|22|78|0|T|MED
+Falafel Bowl with Hummus and Tabbouleh|Baked falafel, hummus and a parsley-bulgur tabbouleh|590|21|74|0|GT|MIDEAST
+Black Bean Burrito Bowl|Black beans, corn, salsa, rice and shredded lettuce|570|19|100|0|-|MEX
+Vegetable Pad Thai with Tofu|Rice noodles with tofu, bean sprouts, vegetables and crushed peanuts|580|22|82|0|GPS|ASIA
+Tofu and Vegetable Stir-fry with Brown Rice|Tofu with broccoli, peppers and garlic over brown rice|540|24|74|0|GS|ASIA
+Thai Green Curry with Vegetables and Rice|Coconut-based green curry with vegetables and jasmine rice|560|12|82|0|-|ASIA
+Edamame Vegetable Noodle Bowl|Whole-wheat noodles with edamame, cabbage, carrots and spring onion|560|22|80|0|GS|ASIA
+Lentil Spinach Soup with Whole-grain Bread|Hearty lentil and spinach soup with a thick slice of grain bread|470|24|72|0|G|MED
+Pasta Primavera|Whole-wheat penne with seasonal vegetables in a tomato-basil sauce|560|18|94|0|G|CONT
+Chana Masala Stuffed Sweet Potato|Baked sweet potato filled with chickpea masala and coriander|520|17|88|0|-|NI
+Kala Chana Bowl with Bajra Roti|Black chickpea curry with pearl-millet roti and onion salad|540|23|82|0|-|WI
+Kerala Vegetable Stew with Appam|Coconut-milk vegetable stew with two soft rice appams|520|11|84|0|-|SI
+Bisi Bele Bath with Papad|Karnataka lentil-rice-vegetable one-pot with a roasted papad|540|17|90|0|-|SI
+Moong Dal Khichdi with Lauki Sabzi|Soft khichdi with bottle-gourd sabzi and a squeeze of lemon|500|18|88|0|-|WI
+Undhiyu with Bajra Rotla|Gujarati mixed-vegetable medley with millet flatbread|550|14|88|0|-|WI
+Veg Pav Bhaji with Whole-wheat Pav|Mashed vegetable bhaji with two toasted whole-wheat pavs|560|15|92|0|G|WI
+Tofu Poke Bowl|Marinated tofu, edamame, cucumber, carrot and rice with a sesame-ginger dressing|560|26|76|0|GST|ASIA
+Peanut Sesame Soba Salad|Chilled soba noodles with vegetables and a peanut-sesame dressing|570|19|84|0|GPST|ASIA
+Stuffed Capsicum with Quinoa and Beans|Baked peppers filled with quinoa, black beans and corn|500|19|72|0|-|MEX
+Mushroom Matar Masala with Roti|Mushrooms and green peas in a light masala with whole-wheat roti|520|17|78|0|G|NI
+Gobi Matar with Moong Dal and Roti|Cauliflower and peas, yellow moong dal and whole-wheat roti|530|20|82|0|G|NI
+Vegetable Soya Biryani|Fragrant vegetable biryani with soya chunks and an onion salad|580|24|90|0|S|NI
+Dal Palak with Red Rice|Spinach-lentil dal with nutty red rice|520|21|84|0|-|SI
+Chickpea Shawarma Wrap|Spiced roasted chickpeas, pickled vegetables and garlic sauce in a wrap|570|20|80|0|GT|MIDEAST
+Jackfruit Tacos with Slaw|Smoky pulled jackfruit in corn tortillas with crunchy cabbage slaw|520|13|80|0|-|MEX
+Minestrone with Cannellini Beans|Vegetable and bean minestrone with toasted whole-grain bread|480|20|74|0|G|MED
+Ragi Mudde with Vegetable Saaru|Finger-millet balls with a thin vegetable-lentil saaru and greens|500|15|92|0|-|SI
+Green Moong Curry with Jeera Rice|Whole green moong in a mild gravy with cumin rice|530|21|88|0|-|WI
+Coconut Chickpea Curry with Quinoa|Chickpeas simmered in coconut and curry leaves over quinoa|570|20|78|0|-|SI
+Lemon Herb Couscous with Roasted Vegetables|Whole-wheat couscous, roasted vegetables and chickpeas with herbs|540|18|86|0|G|MED
+Paneer Tikka Bowl with Millet Rice|Grilled paneer tikka, millet rice, salad and mint chutney|600|34|68|1|D|NI
+Palak Paneer with Roti|Paneer in a spinach gravy with two whole-wheat rotis|580|28|66|1|DG|NI
+Light Dal Makhani with Brown Rice|Slow-cooked black lentils with minimal cream over brown rice|560|22|82|1|D|NI
+Kadhi Khichdi with Salad|Yogurt kadhi with moong khichdi and a crisp salad|540|20|84|1|D|WI
+Curd Rice with Roasted Vegetables|Cool curd rice with pomegranate, plus a tray of roasted vegetables|480|15|74|1|D|SI
+Matar Paneer with Jowar Roti|Peas and paneer in tomato gravy with sorghum roti|570|27|64|1|D|NI
+Paneer Burrito Bowl|Spiced paneer, beans, rice, corn salsa and lettuce|600|28|80|1|D|MEX
+Greek Chickpea Salad with Feta and Pita|Chickpeas, cucumber, olives and feta with warm whole-wheat pita|540|22|60|1|DG|MED
+Veg Pulao with Mint Raita and Chana|Vegetable pulao with boiled chana and a cooling mint raita|540|20|86|1|D|NI
+Whole-wheat Penne with Ricotta and Spinach|Penne tossed with spinach, ricotta and garlic|580|26|78|1|DG|CONT
+Paneer Bhurji Roti Roll|Paneer bhurji rolled in a whole-wheat roti with a crunchy salad|560|27|62|1|DG|NI
+Mushroom and Cottage Cheese Quinoa Bowl|Sautéed mushrooms and cottage cheese over herbed quinoa|550|28|60|1|D|CONT
+Egg Curry with Brown Rice and Salad|Home-style egg curry with brown rice and cucumber salad|560|28|70|2|E|NI
+Egg Fried Rice with Greens|Brown-rice fried rice with scrambled egg and stir-fried greens|550|22|78|2|EGS|ASIA
+Masala Egg Roll with Cucumber Salad|Spiced egg-wrapped roti roll with a crisp cucumber salad|520|24|58|2|EG|NI
+Egg Salad Bowl with Quinoa and Greens|Chopped boiled eggs, quinoa, greens and a lemon-mustard dressing|520|27|56|2|E|CONT
+Grilled Chicken with Herbed Rice|Herb-grilled chicken breast with rice and sautéed seasonal vegetables|580|44|62|3|-|CONT
+Chicken Tikka Bowl with Millet Pulao|Yogurt-marinated chicken tikka, millet pulao and mint chutney|590|46|64|3|D|NI
+Home-style Chicken Curry with Brown Rice|Light onion-tomato chicken curry with brown rice and salad|600|40|68|3|-|NI
+Light Chicken Biryani with Cucumber Salad|Fragrant biryani made with less oil and plenty of chicken|620|38|82|3|D|NI
+Chicken Keema with Whole-wheat Roti|Minced chicken with peas, two rotis and onion salad|580|40|56|3|G|NI
+Chettinad Chicken with Ragi Roti|Peppery Chettinad chicken with finger-millet roti|600|42|60|3|-|SI
+Grilled Fish with Lemon Herb Quinoa|Pan-grilled white fish over lemon-herb quinoa|540|42|50|3|F|CONT
+Goan Fish Curry with Red Rice|Coconut-tamarind fish curry with red rice|580|36|70|3|F|WI
+Prawn Masala with Brown Rice|Prawns in a coastal masala with brown rice and a lime wedge|540|36|66|3|C|WI
+Garlic Prawn Noodle Stir-fry|Prawns and vegetables stir-fried with whole-wheat noodles|560|34|72|3|CGS|ASIA
+Chicken Burrito Bowl|Grilled chicken, beans, rice, salsa and lettuce|620|44|76|3|-|MEX
+Chicken Caesar-style Salad|Grilled chicken, romaine, parmesan and whole-grain croutons|480|40|34|3|EGD|CONT
+Chicken Shawarma Plate|Spiced chicken, hummus, pickled vegetables and a salad|600|44|58|3|GTD|MIDEAST
+Thai Basil Chicken with Rice|Minced chicken stir-fried with basil, chilli and green beans over rice|580|38|74|3|GS|ASIA
+Chicken Mulligatawny with Bread|Lentil-chicken pepper soup with a slice of whole-grain bread|480|32|52|3|G|SI
+Lemon Herb Chicken Pasta|Whole-wheat pasta with chicken, garlic, lemon and parsley|600|42|76|3|G|CONT
+Lean Mutton Curry with Roti|Slow-cooked lean mutton in a light gravy with two rotis|620|38|58|3|G|NI
+Tuna and White Bean Salad Bowl|Tuna, cannellini beans, tomato and rocket with olive oil|470|36|40|3|F|MED
+Teriyaki Fish Rice Bowl|Glazed fish over rice with edamame and cucumber|590|38|72|3|FGS|ASIA
+Kerala Chicken Stew with Appam|Mild coconut chicken stew with two appams|580|38|66|3|-|SI
+Chicken Kathi Roll|Spiced chicken rolled in whole-wheat roti with onion and mint chutney|560|34|62|3|G|NI
+Greek Chicken Souvlaki Plate|Grilled chicken skewers with tzatziki, salad and pita|600|44|50|3|DG|MED
+Chicken Fried Rice with Greens|Brown-rice fried rice with chicken, egg and vegetables|570|36|70|3|EGS|ASIA

@@ -1,0 +1,78 @@
+# name|description|kcal|protein_g|carbs_g|diet|allergens|cuisine
+Mixed Dal Khichdi with Sautéed Greens|Soft lentil-rice khichdi with garlicky sautéed greens|470|18|78|0|-|NI
+Vegetable Dalia with Moong Sprouts|Savoury broken wheat with vegetables and sprouted moong|440|17|74|0|G|NI
+Lauki Chana Dal with Roti|Bottle gourd and split chickpea dal with two rotis|450|18|68|0|G|NI
+Tofu Tikka with Mint Chutney|Grilled spiced tofu skewers with salad and mint chutney|400|27|28|0|S|NI
+Roasted Vegetable and Chickpea Tray-bake with Quinoa|Oven-roasted vegetables and chickpeas over lemon quinoa|480|18|70|0|-|MED
+Palak Soup with Multigrain Toast|Silky spinach soup with a slice of seeded toast|380|14|52|0|G|CONT
+Tomato Rasam with Millet Rice and Beans Poriyal|Peppery rasam, millet rice and a dry green-bean poriyal|420|13|78|0|-|SI
+Tofu Stir-fry with Clear Vegetable Soup|Garlic-ginger tofu stir-fry with a light vegetable broth|390|22|40|0|S|ASIA
+Millet Idli with Vegetable Sambar|Three soft millet idlis with a vegetable-packed sambar|420|15|76|0|-|SI
+Bhindi Masala with Bajra Roti|Dry okra masala with pearl-millet roti|440|11|68|0|-|NI
+Soya Granule Cauliflower Rice Bowl|Cauliflower rice stir-fried with soya granules and vegetables|400|28|36|0|S|ASIA
+Whole Masoor Dal with Phulka|Brown lentil dal with two soft phulkas and sliced cucumber|450|20|70|0|G|NI
+Coconut Vegetable Curry with Red Rice|Mild coconut curry of seasonal vegetables with red rice|470|10|72|0|-|SI
+Zucchini Noodles with Lentil Bolognese|Spiralised zucchini with a rich lentil and tomato sauce|420|24|50|0|-|CONT
+Pea Soup with Bread and Hummus|Minted green-pea soup with whole-grain bread and a spoon of hummus|430|17|56|0|GT|MED
+Mushroom Barley Stew|Slow-cooked barley with mushrooms, carrots and thyme|410|14|70|0|G|CONT
+Bean and Vegetable Chili with Brown Rice|Smoky three-bean chili over brown rice|480|20|80|0|-|MEX
+Sweet Potato Chaat Bowl|Roasted sweet potato, chickpeas, tamarind and mint|440|13|74|0|-|NI
+Methi Matar with Jowar Roti|Fenugreek and green peas in a light masala with sorghum roti|440|14|68|0|-|NI
+Teriyaki Tofu with Broccoli and Rice|Glazed tofu, steamed broccoli and a small bowl of rice|470|23|62|0|GS|ASIA
+Tom Kha Tofu Soup|Coconut-lemongrass soup with tofu and mushrooms|400|16|40|0|S|ASIA
+Chana Dal Tadka with Brown Rice|Tempered split chickpea dal with brown rice|470|19|78|0|-|NI
+Vegetable Kootu with Millet|Lentil and vegetable kootu with fluffy millet|430|15|70|0|-|SI
+Baked Falafel Plate|Oven-baked falafel with cucumber-tomato salad and lemon|440|18|56|0|T|MIDEAST
+Spinach Lentil Dal with Quinoa|Spinach-laced lentils served over fluffy quinoa|440|22|62|0|-|NI
+Black Bean and Corn Wraps with Guacamole|Whole-wheat wraps with spiced black beans, corn and guacamole|470|16|70|0|G|MEX
+Gujarati Vaghareli Khichdi with Salad|Tempered khichdi with mixed vegetables and a fresh salad|450|15|76|0|-|WI
+Pumpkin Soup with Seed Crackers|Roasted pumpkin and ginger soup with crunchy seed crackers|370|9|52|0|-|CONT
+Mixed Sprouts Curry with Phulka|Sprouted moth and moong in a tangy gravy with phulkas|440|20|66|0|G|WI
+Moroccan Eggplant and Chickpea Stew with Couscous|Warm-spiced stew with apricots served over whole-wheat couscous|470|16|76|0|G|MIDEAST
+Stir-fried Soba with Edamame|Buckwheat noodles with vegetables and edamame in a light soy glaze|460|20|68|0|GS|ASIA
+Ridge Gourd Dal with Roti|Light turai dal with two whole-wheat rotis|430|16|66|0|G|SI
+Lemon Coriander Soup with Grilled Tofu|Zesty vegetable soup with golden grilled tofu strips|380|22|34|0|S|ASIA
+Veg Flatbread Pizza with Cashew Cheese|Whole-wheat base topped with vegetables and a cashew cream|480|15|66|0|GN|CONT
+Kerala Avial with Red Rice|Mixed vegetables in coconut and curry leaf with red rice|450|10|72|0|-|SI
+Dosa with Tomato Chutney and Sambar|Two crisp dosas with tomato chutney and sambar|430|12|76|0|-|SI
+Roasted Tomato and White Bean Pasta|Whole-wheat pasta with slow-roasted tomatoes and white beans|490|20|82|0|G|MED
+Bengali Masoor Dal with Rice and Lau Sabzi|Red lentil dal, steamed rice and bottle-gourd sabzi|440|18|76|0|-|EI
+Bengali Vegetable Chorchori with Rice and Dal|Mixed-vegetable stir-fry with panch phoron, rice and dal|470|15|80|0|-|EI
+Paneer Tikka with Grilled Vegetables|Charred paneer tikka with grilled peppers, onions and mint chutney|430|30|24|1|D|NI
+Paneer Methi Masala with Roti|Paneer with fenugreek in a light gravy with two rotis|480|26|50|1|DG|NI
+Dahi Kadhi with Vegetable Pulao|Tempered yogurt kadhi with a light vegetable pulao|470|16|72|1|D|NI
+Baked Vegetable Casserole with Ricotta|Layered vegetables baked with ricotta and herbs|450|24|40|1|DG|CONT
+Paneer and Pepper Stir-fry with Rice|Paneer cubes with peppers and garlic served with steamed rice|470|26|56|1|D|ASIA
+Spinach and Corn Quesadilla|Whole-wheat quesadilla with spinach, corn and cheese|470|20|52|1|DG|MEX
+Tomato Basil Soup with Cheese Toastie|Roasted tomato soup with a small grilled cheese sandwich|470|18|56|1|DG|CONT
+Lauki Kofta in Tomato Gravy with Roti|Baked bottle-gourd koftas in light tomato gravy with roti|430|14|60|1|DG|NI
+Greek Lentil Salad with Feta|Green lentils, cucumber, olives, tomato and feta|400|20|42|1|D|MED
+Cottage Cheese Tikka Wrap|Grilled cottage cheese tikka in a wrap with salad|440|26|44|1|DG|NI
+Light Vegetable Lasagna|Whole-wheat lasagna layered with vegetables and a light white sauce|480|22|56|1|DG|CONT
+Baked Eggplant Parmesan with Salad|Oven-baked aubergine slices with tomato and parmesan|440|20|36|1|DG|CONT
+Egg Curry with Phulka and Greens|Light egg curry with two phulkas and sautéed greens|450|26|42|2|EG|NI
+Vegetable Egg Fried Rice|Brown rice stir-fried with egg, beans and carrots|470|20|66|2|EGS|ASIA
+Spanish Tortilla with Salad|Potato-and-egg bake with a leafy side salad|430|22|34|2|E|MED
+Egg Drop Soup with Vegetable Stir-fry|Silky egg-ribbon soup with a garlicky vegetable stir-fry|380|22|32|2|ES|ASIA
+Grilled Chicken with Greens and Sweet Potato|Grilled chicken breast, sautéed greens and roasted sweet potato|470|44|40|3|-|CONT
+Chicken and Vegetable Stew|Gently spiced chicken stew with carrots, beans and potatoes|430|36|34|3|-|CONT
+Chicken Clear Soup with Stir-fried Vegetables|Ginger-pepper chicken broth with a quick vegetable stir-fry|360|34|24|3|S|ASIA
+Tandoori Chicken with Mint Chutney|Tandoori chicken pieces with salad and mint chutney|420|42|18|3|D|NI
+Fish Tikka with Lemon Quinoa|Spiced fish tikka over lemon quinoa|440|38|40|3|FD|NI
+Baked Fish with Roasted Vegetables|Herb-baked white fish with oven-roasted vegetables|420|38|26|3|F|CONT
+Prawn Curry with Cauliflower Rice|Coastal prawn curry served over cauliflower rice|400|34|22|3|C|WI
+Chicken Saag with Roti|Chicken in a spinach gravy with a whole-wheat roti|480|38|42|3|G|NI
+Kerala Pepper Chicken with Ragi Roti|Pepper-roasted chicken with finger-millet roti|490|40|44|3|-|SI
+Lemon-Garlic Chicken Zoodles|Pan-seared chicken with zucchini noodles, garlic and lemon|400|38|20|3|-|CONT
+Chicken Chukka with Phulka and Salad|Dry-roasted South Indian chicken with a phulka and salad|470|38|40|3|G|SI
+Teriyaki Chicken with Broccoli and Rice|Glazed chicken, steamed broccoli and rice|500|36|62|3|GS|ASIA
+Grilled Fish Tacos with Cabbage Slaw|Grilled fish in corn-and-wheat tortillas with crunchy slaw|480|32|52|3|FG|MEX
+Thai Chicken Larb Lettuce Wraps|Zesty minced chicken with herbs served in crisp lettuce cups|380|34|18|3|FS|ASIA
+Chicken Souvlaki Salad|Grilled chicken over greens, cucumber and tomato with yogurt dressing|430|40|24|3|D|MED
+Mediterranean Fish Stew|Tomato-saffron fish stew with whole-grain bread|440|36|42|3|FG|MED
+Prawn and Vegetable Stir-fry with Brown Rice|Garlic prawns with vegetables and brown rice|470|32|58|3|CGS|ASIA
+Chicken and Lentil Shorba with Toast|Warm spiced chicken-lentil soup with toasted bread|440|36|44|3|G|MIDEAST
+Chicken Tikka Wrap with Salad|Chicken tikka in a whole-wheat wrap with crunchy vegetables|480|36|46|3|GD|NI
+Bengali Fish Jhol with Rice|Light turmeric-and-ginger fish stew with steamed rice|480|34|58|3|F|EI
+Chicken Fajita Plate|Sizzling chicken and peppers with a warm tortilla and salsa|470|38|40|3|G|MEX
+Lean Mutton Stew with Millet Roti|Slow-cooked mutton and vegetable stew with a millet roti|500|36|44|3|G|NI

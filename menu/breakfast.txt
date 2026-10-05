@@ -1,0 +1,74 @@
+# name|description|kcal|protein_g|carbs_g|diet|allergens|cuisine
+# diet: 0 vegan, 1 vegetarian (dairy ok), 2 vegetarian + eggs, 3 non-vegetarian
+# allergens: D dairy, G gluten, N tree nuts, P peanuts, S soy, E egg, F fish, C shellfish, T sesame, - none
+# cuisine: NI north-indian, SI south-indian, WI west-indian, EI east-indian, MED mediterranean, MEX mexican, ASIA asian, MIDEAST middle-eastern, CONT continental
+
+Poha with Peanuts and Lemon|Flattened rice tempered with mustard, curry leaves, peas and roasted peanuts|340|9|55|0|P|WI
+Vegetable Upma|Roasted semolina cooked with carrots, beans, ginger and curry leaves|320|8|52|0|G|SI
+Ragi Dosa with Coconut Chutney|Crisp finger-millet crepes served with fresh coconut chutney|300|8|52|0|-|SI
+Moong Dal Chilla|Savoury yellow lentil pancakes with onion, green chilli and coriander|310|17|42|0|-|NI
+Besan Chilla with Mint Chutney|Chickpea-flour crepes with spinach and a fresh green chutney|290|14|38|0|-|NI
+Idli with Vegetable Sambar|Steamed rice-and-lentil cakes with a vegetable-rich sambar|310|11|58|0|-|SI
+Vegetable Oats Khichdi|Savoury oats simmered with vegetables and cumin|300|10|50|0|G|NI
+Overnight Oats with Banana and Chia|Rolled oats soaked in soy milk with banana, chia and cinnamon|360|12|58|0|GS|CONT
+Millet Porridge with Jaggery and Dates|Warm foxtail millet porridge sweetened with jaggery and chopped dates|330|9|62|0|-|WI
+Avocado Smash on Multigrain Toast|Mashed avocado, lemon, chilli flakes and cherry tomatoes on seeded toast|340|9|40|0|G|CONT
+Tofu Scramble Wrap|Turmeric tofu scramble with peppers in a whole-wheat wrap|370|20|40|0|GS|MEX
+Peanut Butter Banana Toast|Whole-grain toast with peanut butter, banana slices and cinnamon|360|12|46|0|GP|CONT
+Sprouted Moong Salad Bowl|Sprouts, cucumber, tomato, pomegranate and lemon with chaat masala|230|14|34|0|-|NI
+Vegetable Dalia Porridge|Broken wheat cooked with carrots, peas and mild spices|310|10|55|0|G|NI
+Sabudana Khichdi|Tapioca pearls with potato, roasted peanuts and lemon|380|7|62|0|P|WI
+Ragi Malt Porridge with Almonds|Smooth finger-millet porridge topped with sliced almonds|300|9|50|0|N|SI
+Masala Oats Uttapam|Thick oats-and-semolina pancakes topped with onion, tomato and coriander|320|10|50|0|G|SI
+Appam with Vegetable Stew|Lacy fermented rice hoppers with a coconut-milk vegetable stew|350|8|56|0|-|SI
+Thalipeeth with Cucumber Salad|Multigrain Maharashtrian flatbread with a cooling cucumber salad|330|11|46|0|G|WI
+Methi Thepla with Mint Chutney|Soft fenugreek flatbreads with a fresh mint chutney|320|9|44|0|G|WI
+Rava Idli with Coconut Chutney|Soft semolina idlis with carrot and a mustard-curry leaf tempering|300|8|50|0|G|SI
+Pesarattu|Green gram dosa with ginger and green chilli, served with ginger chutney|320|15|45|0|-|SI
+Quinoa Breakfast Bowl with Berries and Walnuts|Warm quinoa with cinnamon, mixed berries and crushed walnuts|340|11|46|0|N|CONT
+Mango Chia Pudding|Chia soaked in coconut milk and layered with fresh mango|320|7|38|0|-|CONT
+Green Smoothie Bowl|Spinach, banana and flaxseed blended thick, topped with pumpkin seeds|310|9|48|0|-|CONT
+Sweet Potato and Black Bean Burrito|Roasted sweet potato, black beans and salsa in a whole-wheat tortilla|380|14|60|0|G|MEX
+Hummus and Cucumber Pita|Whole-wheat pita filled with hummus, cucumber and tomato|340|13|48|0|GT|MIDEAST
+Smoky White Bean Toast|Cannellini beans with tomato and smoked paprika on toasted sourdough|340|14|48|0|G|CONT
+Banana Oat Pancakes with Berry Compote|Fluffy eggless oat pancakes with warm mixed-berry compote|350|9|62|0|G|CONT
+Almond Butter Apple Rings with Granola|Apple rings spread with almond butter and sprinkled with granola|330|9|44|0|GN|CONT
+Millet Pongal with Black Pepper|Creamy millet and moong dal pongal tempered with pepper and cumin|330|10|54|0|-|SI
+Vermicelli Vegetable Upma|Roasted vermicelli with peas, carrots and mustard seeds|310|8|54|0|G|SI
+Aval Poha with Jaggery and Coconut|Sweet beaten-rice bowl with fresh coconut, jaggery and cardamom|330|6|60|0|-|SI
+Buckwheat Pancakes with Coconut Chutney|Kuttu atta pancakes with grated vegetables and coconut chutney|300|9|48|0|-|NI
+Beetroot Oats Chilla|Savoury beetroot and oats crepes with a yogurt-free mint dip|290|10|44|0|G|NI
+Jowar Roti with Spiced Aloo Methi|Sorghum flatbread with lightly spiced potato and fenugreek|340|8|58|0|-|WI
+Warm Spiced Quinoa Upma|Quinoa cooked upma-style with vegetables and curry leaves|330|11|48|0|-|SI
+Tofu Bhurji Toast|Crumbled spiced tofu on whole-wheat toast with tomato and coriander|360|20|34|0|GS|NI
+Fruit Bowl with Soy Yogurt and Seeds|Seasonal fruit with plain soy yogurt and pumpkin seeds|260|9|40|0|S|CONT
+Baked Veggie Oat Muffins|Two savoury oat muffins baked with carrot, spinach and sweetcorn|300|10|42|0|G|CONT
+Paneer Bhurji with Multigrain Toast|Scrambled paneer with onion, tomato and spices on multigrain toast|400|24|32|1|DG|NI
+Greek Yogurt Parfait|Thick yogurt layered with berries, honey and crunchy granola|330|18|44|1|DGN|CONT
+Warm Milk Dalia with Cardamom|Broken wheat simmered in milk with dates and cardamom|340|13|56|1|DG|NI
+Paneer Stuffed Paratha with Curd|Whole-wheat paratha stuffed with spiced paneer, served with fresh curd|420|18|52|1|DG|NI
+Cheese and Veggie Sandwich|Grilled whole-wheat sandwich with cheese, cucumber, tomato and greens|350|15|40|1|DG|CONT
+Savoury Curd Oats|Oats mixed with curd, grated cucumber, carrot and tempered mustard|290|13|38|1|DG|NI
+Cottage Cheese Toast with Tomato and Basil|Toasted bread with seasoned cottage cheese, tomato and basil|330|20|34|1|DG|MED
+Masala Paneer Dosa|Crisp dosa filled with spiced crumbled paneer, served with chutney|400|17|50|1|D|SI
+Apple Cinnamon Milk Oats|Rolled oats cooked in milk with grated apple and cinnamon|320|12|52|1|DG|CONT
+Besan Paneer Chilla|Chickpea-flour crepes stuffed with grated paneer and herbs|340|20|34|1|D|NI
+Mango Lassi Bowl|Thick mango-yogurt bowl with chia seeds and sliced banana|330|13|52|1|D|NI
+Spinach and Feta Wrap|Whole-wheat wrap with sautéed spinach, feta and tomato|370|17|40|1|DG|MED
+Masala Omelette with Multigrain Toast|Two-egg omelette with onion, chilli and coriander, plus toast|370|22|30|2|EG|NI
+Egg Bhurji Wrap|Spiced scrambled eggs rolled in a whole-wheat wrap|390|22|38|2|EG|NI
+Boiled Egg and Avocado Plate|Two boiled eggs with sliced avocado and seeded toast|380|17|32|2|EG|CONT
+Spinach and Mushroom Egg-White Scramble|Fluffy egg whites with spinach, mushrooms and black pepper|290|24|18|2|E|CONT
+Egg Dosa with Tomato Chutney|Thin dosa topped with a layer of beaten egg and pepper|330|17|40|2|E|SI
+Shakshuka with Whole-wheat Pita|Eggs poached in spiced tomato-pepper sauce with warm pita|380|20|36|2|EG|MIDEAST
+Veggie Egg Muffins with Fruit|Three baked egg muffins with peppers and spinach, plus fruit|320|21|22|2|E|CONT
+Anda Paratha Roll|Egg-layered whole-wheat paratha rolled with onion and mint chutney|420|20|44|2|EG|NI
+Egg and Sweet Potato Hash|Diced sweet potato and peppers pan-roasted and topped with a fried egg|360|17|38|2|E|CONT
+Bombay Masala Egg Toast|Street-style spiced egg toast with onion and green chilli|350|18|34|2|EG|WI
+Protein Oat Pancakes|Egg, banana and oat pancakes served with a peanut butter drizzle|360|18|44|2|EGP|CONT
+Egg and Cheese Veggie Toastie|Toasted sandwich with egg, cheese and sautéed vegetables|380|20|34|2|EGD|CONT
+Poha with Boiled Egg|Classic poha with turmeric and peas, topped with a boiled egg|370|17|50|2|EP|WI
+Chicken Keema Toast|Lightly spiced minced chicken on whole-wheat toast with coriander|400|28|32|3|G|NI
+Chicken and Veggie Omelette Wrap|Chicken strips and vegetables folded into an omelette wrap|420|30|34|3|EG|CONT
+Tuna and Avocado Toast|Flaked tuna with avocado and lemon on whole-grain toast|380|26|30|3|FG|CONT
+Chicken and Egg Breakfast Burrito|Scrambled egg, shredded chicken and beans in a whole-wheat tortilla|430|30|40|3|EG|MEX

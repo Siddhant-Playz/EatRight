@@ -1,0 +1,94 @@
+# name|description|kcal|protein_g|carbs_g|diet|allergens|cuisine
+Roasted Chana with Lemon|Crunchy roasted chickpeas tossed with lemon and black salt|150|9|22|0|-|NI
+Apple Slices with Peanut Butter|Crisp apple wedges with a spoon of peanut butter|190|6|22|0|P|CONT
+Banana with Almond Butter|Sliced banana drizzled with almond butter|200|5|30|0|N|CONT
+Fruit Chaat|Seasonal fruit with lime and chaat masala|110|2|26|0|-|NI
+Sprouts Bhel|Sprouted moong with onion, tomato, lime and coriander|170|9|28|0|-|WI
+Roasted Makhana with Pepper|Light, crunchy fox nuts dry-roasted with black pepper|120|4|20|0|-|NI
+Hummus with Cucumber and Carrot Sticks|Creamy hummus with fresh vegetable sticks|160|6|18|0|T|MIDEAST
+Baked Sweet Potato Cubes|Oven-baked sweet potato with chaat masala|150|3|34|0|-|NI
+Mixed Nuts and Dates|A small handful of nuts with two dates|200|6|20|0|N|CONT
+Peanut and Jaggery Bites|Two bite-sized peanut-jaggery sweets|180|6|22|0|P|WI
+Steamed Corn with Lime and Chilli|Sweet corn kernels with lime, salt and chilli|130|4|28|0|-|NI
+Cucumber Tomato Salad with Peanuts|Fresh salad with a sprinkle of roasted peanuts|120|5|12|0|P|NI
+Edamame with Sea Salt|Steamed edamame pods with a pinch of sea salt|140|12|10|0|S|ASIA
+Papaya with Lime and Chia|Ripe papaya cubes with lime juice and chia seeds|100|2|22|0|-|CONT
+Pumpkin Seeds and Raisins|A small mix of roasted pumpkin seeds and raisins|170|8|16|0|-|CONT
+Guacamole with Baked Tortilla Chips|Fresh guacamole with oven-baked chips|190|4|22|0|G|MEX
+Coconut Water Chia Fresca|Coconut water with soaked chia and a squeeze of lime|90|2|14|0|-|CONT
+Almond Butter Stuffed Dates|Two dates filled with almond butter|170|3|30|0|N|MIDEAST
+Murmura Bhel with Peanuts|Puffed rice with onion, tomato, peanuts and tamarind|140|4|28|0|P|WI
+Tomato and Carrot Soup Cup|Warm, lightly spiced vegetable soup|90|3|16|0|-|CONT
+Oat and Banana Energy Bites|Two no-bake bites of oats, banana and cinnamon|180|5|28|0|G|CONT
+Watermelon and Mint Salad|Cool watermelon cubes with fresh mint and lime|90|2|22|0|-|CONT
+Steamed Dhokla with Green Chutney|Two soft steamed chickpea-flour cakes with green chutney|150|7|24|0|-|WI
+Moong Dal Idli|Two protein-rich steamed lentil idlis|140|8|22|0|-|SI
+Soy Milk Banana Shake|Chilled soy milk blended with banana and cinnamon|170|8|28|0|S|CONT
+Orange Segments with Walnuts|Juicy orange segments with a few walnut halves|150|3|18|0|N|CONT
+Carrot and Cucumber Sticks with Peanut Dip|Vegetable sticks with a light peanut dip|160|6|14|0|P|ASIA
+Baked Beetroot Chips with Mint Dip|Oven-baked beetroot crisps with a dairy-free mint dip|130|3|22|0|-|CONT
+Ragi Banana Cookies|Two soft ragi and banana cookies|160|4|28|0|G|SI
+Kiwi and Berries Bowl|Sliced kiwi with mixed berries|90|2|20|0|-|CONT
+Makhana Kheer with Almond Milk|Warm fox-nut pudding made with almond milk and cardamom|170|5|26|0|N|NI
+Sesame Jaggery Ladoo|One traditional til-gud ladoo|150|4|18|0|T|NI
+Chickpea Sundal with Coconut|Boiled chickpeas tempered with mustard and fresh coconut|160|8|22|0|-|SI
+Roasted Almonds|About fifteen dry-roasted almonds|120|4|4|0|N|CONT
+Mango Chia Cup|Mango purée set with chia seeds|150|3|26|0|-|CONT
+Baked Mini Veg Samosa|One baked, lightly spiced vegetable samosa|150|4|24|0|G|NI
+Sweet Corn Chaat Cup|Warm corn tossed with lime, onion and coriander|140|4|26|0|-|NI
+Pomegranate and Cucumber Bowl|Ruby pomegranate pearls with cucumber and mint|100|2|22|0|-|NI
+Seed Crackers with Avocado|Two seeded crackers topped with smashed avocado|180|5|18|0|-|CONT
+Banana Cinnamon Toast|Whole-wheat toast with mashed banana and cinnamon|170|5|32|0|G|CONT
+Pear Slices with Walnuts|Fresh pear slices with a few walnut pieces|160|3|20|0|N|CONT
+Baked Chana Dal Namkeen|Crunchy baked chana dal with mild spices|150|8|20|0|-|NI
+Ragi Malt with Jaggery|Warm finger-millet malt lightly sweetened with jaggery|140|4|26|0|-|SI
+Beetroot Carrot Ginger Juice|Fresh pressed beetroot, carrot and ginger|90|2|20|0|-|CONT
+Pan-seared Tofu Cubes|Golden tofu cubes with pepper and lemon|140|13|4|0|S|ASIA
+Hummus Cucumber Boats|Cucumber halves filled with hummus and paprika|130|5|14|0|T|MIDEAST
+Peanut Butter Rice Cake|A crisp rice cake with a thin layer of peanut butter|170|6|20|0|P|CONT
+Pineapple with Chilli and Lime|Juicy pineapple chunks with a pinch of chilli|90|1|22|0|-|MEX
+Mixed Bean Salad Cup|Kidney beans, corn and tomato with lime|150|8|22|0|-|MEX
+Mini Avocado Toasts|Two mini toasts with smashed avocado and chilli flakes|170|4|20|0|G|CONT
+Spinach Apple Ginger Smoothie|Green smoothie with spinach, apple and ginger|110|2|24|0|-|CONT
+Date and Walnut Energy Balls|Two balls of dates and walnuts rolled in cocoa|180|4|24|0|N|CONT
+Poha Chivda|A small bowl of lightly roasted, spiced poha mix|150|4|24|0|P|WI
+Mini Idli Bites with Podi|Three mini idlis tossed in sesame-lentil podi|140|4|26|0|T|SI
+Baked Plantain Chips|Thin, oven-baked raw banana chips|140|1|22|0|-|SI
+Tomato Bruschetta|Two toasted slices with tomato, basil and garlic|140|4|22|0|G|MED
+Air-fried Soya Chunk Bites|Crisp, spiced soya chunk bites|150|14|12|0|S|NI
+Fig and Almond Pair|Two dried figs with five almonds|140|3|22|0|N|MIDEAST
+Fresh Coconut with Jaggery|Fresh coconut pieces with a small piece of jaggery|160|2|16|0|-|SI
+Sprouted Moong Tikki|Two pan-seared sprouted moong patties|150|9|20|0|-|NI
+Cashew and Raisin Cup|A small cup of roasted cashews and raisins|170|5|16|0|N|CONT
+Strawberry Banana Oat Milk Smoothie|Smoothie with strawberries, banana and oat milk|160|4|32|0|G|CONT
+Baked Falafel Bites|Three crisp baked falafel with lemon|150|7|18|0|T|MIDEAST
+Guava with Chaat Masala|Crisp guava wedges with chaat masala|90|3|18|0|-|NI
+Spiced Air-popped Popcorn|Light popcorn with turmeric, pepper and salt|110|3|20|0|-|CONT
+Boiled Peanut Masala|Boiled peanuts with onion, tomato and lime|170|8|14|0|P|SI
+Beet Hummus with Veggie Sticks|Vibrant beet hummus with crunchy vegetables|150|5|16|0|T|MIDEAST
+Baked Sweet Potato Tikki|Two baked sweet potato patties with mint chutney|150|3|30|0|-|NI
+Mini Veg Oats Uttapam|Two small oats uttapams with onion and tomato|150|5|24|0|G|SI
+Cinnamon Baked Apple|Warm apple baked with cinnamon and raisins|120|1|30|0|-|CONT
+Greek Yogurt with Berries and Honey|Thick yogurt with fresh berries and a drizzle of honey|150|12|18|1|D|CONT
+Paneer Cubes with Pepper and Cucumber|Lightly seasoned paneer with cucumber slices|170|12|4|1|D|NI
+Masala Buttermilk|Chilled buttermilk with roasted cumin and mint|50|3|5|1|D|NI
+Cottage Cheese on Multigrain Cracker|Two crackers topped with seasoned cottage cheese|160|12|14|1|DG|CONT
+Low-sugar Mango Lassi|Yogurt blended with ripe mango and cardamom|160|7|26|1|D|NI
+Cheese and Cucumber Sandwich Bites|Four small whole-wheat sandwich bites|180|9|22|1|DG|CONT
+Makhana Roasted in Ghee|Fox nuts roasted with a little ghee and salt|130|4|18|1|D|NI
+Yogurt Fruit Cup with Seeds|Plain yogurt, fruit and a sprinkle of mixed seeds|180|8|26|1|D|CONT
+Paneer Tikka Skewers|Three small grilled paneer tikka pieces|180|13|6|1|D|NI
+Milk with Dates and Cardamom|A glass of warm milk with two dates|170|8|26|1|D|NI
+Baked Dahi Papdi Chaat|Baked whole-wheat papdi with yogurt, chutney and pomegranate|180|7|28|1|DG|NI
+Strawberry Yogurt Smoothie|Strawberries blended with yogurt|160|8|26|1|D|CONT
+Oats and Curd Bowl|Oats with curd, pomegranate and a pinch of cumin|170|8|26|1|DG|NI
+Baked Cheese Mushroom Caps|Three mushroom caps baked with cheese and herbs|140|10|6|1|D|CONT
+Peanut Butter Yogurt Dip with Apple|Greek yogurt and peanut butter dip with apple slices|190|11|20|1|DP|CONT
+Boiled Eggs with Pepper|Two boiled eggs with cracked pepper|140|12|1|2|E|CONT
+Egg White Bhurji Cup|Spiced scrambled egg whites in a cup|110|14|3|2|E|NI
+Deviled-style Egg Halves|Three egg halves with a mustard-yogurt filling|150|11|2|2|ED|CONT
+Egg and Veg Mini Wrap|A small wrap with egg, cucumber and mint chutney|180|10|20|2|EG|CONT
+Chicken Tikka Bites|Four small pieces of grilled chicken tikka|160|20|4|3|D|NI
+Tuna Cucumber Bites|Tuna and herbs served on cucumber rounds|130|14|6|3|F|CONT
+Chicken Lettuce Cup|Shredded chicken in a lettuce leaf with yogurt dressing|150|18|6|3|D|CONT
+Grilled Prawn Skewers|Three lightly spiced grilled prawns|130|20|3|3|C|WI
