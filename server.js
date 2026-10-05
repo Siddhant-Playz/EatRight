@@ -1,5 +1,3 @@
-==================== server.js ====================
-
 const express = require("express");
 const Database = require("better-sqlite3");
 const fs = require("fs");
@@ -2285,4 +2283,3 @@ app.listen(
 
   }
 );
-
