@@ -1592,7 +1592,7 @@ async function openMealDialog(index, dish) {
           <label>Payment method
             <select name="payment_method">
               <option value="cod">Cash on delivery</option>
-              <option value="online">Online payment (gateway setup pending)</option>
+              ${onlinePaymentsEnabled?'<option value="online">Online payment (UPI, cards, netbanking)</option>':''}
             </select>
           </label>
 
@@ -1661,6 +1661,72 @@ async function openMealDialog(index, dish) {
 
 }
 
+/* Order is saved (and paid, if online): mark this meal as delivered and show the receipt. */
+async function completeMealOrder(index, dish, result, message) {
+
+  await setProgress(index, true);
+
+  const box = document.querySelector("#meal-dialog .meal-dialog-body");
+
+  if (!box) return;
+
+  box.innerHTML = `
+    <p class="meal-dialog-eyebrow">${MEALS[index].icon} ${escapeHTML(MEALS[index].name)}</p>
+    <h2>Order placed</h2>
+    <p class="meal-dialog-desc">${escapeHTML(dish.name)} is on its way.</p>
+    <p class="meal-dialog-facts">${escapeHTML(message || "")}<br>Order reference: <strong>${escapeHTML(result.order_code)}</strong></p>
+    <div class="meal-dialog-actions">
+      <button class="btn primary" type="button" id="meal-dialog-done">Done</button>
+    </div>`;
+
+  document.getElementById("meal-dialog-done").addEventListener("click", closeMealDialog);
+
+}
+
+/* The online payment was cancelled or failed: the order is saved but unpaid, so the meal stays incomplete. */
+function showMealPaymentPending(index, dish, result, phone, errorText) {
+
+  const box = document.querySelector("#meal-dialog .meal-dialog-body");
+
+  if (!box) return;
+
+  box.innerHTML = `
+    <p class="meal-dialog-eyebrow">${MEALS[index].icon} ${escapeHTML(MEALS[index].name)}</p>
+    <h2>Payment not completed</h2>
+    <p class="meal-dialog-desc">Your order <strong>${escapeHTML(result.order_code)}</strong> is saved but not paid yet.</p>
+    ${errorText ? `<p class="meal-dialog-error">${escapeHTML(errorText)}</p>` : ""}
+    <p class="meal-dialog-facts">You can pay now, or finish later from Your orders on the menu page. If money was deducted, contact us with this order reference.</p>
+    <div class="meal-dialog-actions">
+      <button class="btn primary" type="button" id="meal-dialog-retry">Pay now</button>
+      <button class="meal-dialog-close" type="button" id="meal-dialog-later">Close</button>
+    </div>`;
+
+  document.getElementById("meal-dialog-later").addEventListener("click", closeMealDialog);
+
+  document.getElementById("meal-dialog-retry").addEventListener("click", async (event) => {
+
+    event.target.disabled = true;
+
+    try {
+
+      const outcome = await payForOrder(result.id, phone);
+
+      if (outcome.paid) {
+        await completeMealOrder(index, dish, result, "Payment received. Thank you!");
+      } else {
+        showMealPaymentPending(index, dish, result, phone, outcome.error || "");
+      }
+
+    } catch (error) {
+
+      showMealPaymentPending(index, dish, result, phone, error.message || "Could not start payment.");
+
+    }
+
+  });
+
+}
+
 async function confirmMealDelivery(index, dish, formData) {
 
   if (mealDialogBusy) return;
@@ -1704,22 +1770,33 @@ async function confirmMealDelivery(index, dish, formData) {
       throw new Error(result.error || "Could not place your order.");
     }
 
-    // Order is saved: mark this meal as delivered in the journey.
-    await setProgress(index, true);
+    let paid = !result.payment;   // cash on delivery has no payment step
 
-    const box = document.querySelector("#meal-dialog .meal-dialog-body");
+    let paymentError = "";
 
-    if (box) {
-      box.innerHTML = `
-        <p class="meal-dialog-eyebrow">${MEALS[index].icon} ${escapeHTML(MEALS[index].name)}</p>
-        <h2>Order placed</h2>
-        <p class="meal-dialog-desc">${escapeHTML(dish.name)} is on its way.</p>
-        <p class="meal-dialog-facts">${escapeHTML(result.message || "")}<br>Order reference: <strong>${escapeHTML(result.order_code)}</strong></p>
-        <div class="meal-dialog-actions">
-          <button class="btn primary" type="button" id="meal-dialog-done">Done</button>
-        </div>`;
-      document.getElementById("meal-dialog-done").addEventListener("click", closeMealDialog);
+    if (result.payment) {
+
+      confirmButton.textContent = "Opening payment…";
+
+      const outcome = await startRazorpayPayment(result.id, result.payment, { contact: formData.get("phone") });
+
+      paid = !!outcome.paid;
+
+      paymentError = outcome.error || "";
+
     }
+
+    if (!paid) {
+
+      showMealPaymentPending(index, dish, result, formData.get("phone"), paymentError);
+
+      mealDialogBusy = false;
+
+      return;
+
+    }
+
+    await completeMealOrder(index, dish, result, result.payment ? "Payment received. Thank you!" : result.message);
 
     mealDialogBusy = false;
 
@@ -4265,6 +4342,83 @@ function navigate(
 let shopMenu = [];
 let shopOrders = [];
 let shopCart = {};
+
+/* ---------- Razorpay checkout (browser side) ---------- */
+let onlinePaymentsEnabled = false;
+fetch('/api/payment-config').then(r => r.json()).then(c => { onlinePaymentsEnabled = !!c.online; }).catch(() => {});
+
+function loadRazorpayScript() {
+  return new Promise((resolve, reject) => {
+    if (window.Razorpay) return resolve();
+    const tag = document.createElement('script');
+    tag.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    tag.onload = () => resolve();
+    tag.onerror = () => reject(new Error('Could not open the payment window. Your order is saved; use "Pay now" under Your orders once you are online.'));
+    document.head.appendChild(tag);
+  });
+}
+
+/* Opens Razorpay Checkout. Resolves { paid:true } only after the server has verified the payment. */
+async function startRazorpayPayment(orderId, session, prefill = {}) {
+  await loadRazorpayScript();
+  return new Promise(resolve => {
+    const checkout = new window.Razorpay({
+      key: session.key_id,
+      amount: session.amount,
+      currency: session.currency,
+      order_id: session.order_id,
+      name: session.name,
+      description: session.description,
+      prefill,
+      handler: async (response) => {
+        try {
+          const verify = await fetch(`/api/orders/${orderId}/verify-payment`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature
+            })
+          });
+          const data = await verify.json();
+          resolve(verify.ok ? { paid: true } : { paid: false, error: data.error || 'Payment could not be verified.' });
+        } catch (error) {
+          resolve({ paid: false, error: 'Could not confirm the payment. If money was deducted, contact us with your order number.' });
+        }
+      },
+      modal: { ondismiss: () => resolve({ paid: false, cancelled: true }) }
+    });
+    checkout.open();
+  });
+}
+
+async function payForOrder(orderId, phone) {
+  const response = await fetch(`/api/orders/${orderId}/payment-session`, { method: 'POST' });
+  const session = await response.json();
+  if (!response.ok) throw new Error(session.error || 'Could not start payment.');
+  return startRazorpayPayment(orderId, session, { contact: phone || '' });
+}
+
+async function payShopOrder(id) {
+  try {
+    const order = shopOrders.find(o => o.id === id);
+    const outcome = await payForOrder(id, order && order.customer_phone);
+    if (outcome.paid) {
+      if (pendingMealSlot !== null) {
+        const slot = pendingMealSlot;
+        pendingMealSlot = null;
+        if (!getJourneyProgress().meals[slot]) await setProgress(slot, true);
+      }
+      alert('Payment received. Thank you!');
+      await openShop();
+    } else if (outcome.error) {
+      alert(outcome.error);
+    }
+  } catch (error) {
+    alert(error.message || 'Could not start payment.');
+  }
+}
 const rupees = paise => new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR',maximumFractionDigits:0}).format(Number(paise||0)/100);
 async function openShop() {
   if (isPlanExpired()) { render(); return; }
@@ -4280,8 +4434,8 @@ function shopView() {
   const cartRows=Object.entries(shopCart).map(([id,qty])=>{const item=shopMenu.find(x=>x.id===Number(id));return item?`<div class="shop-cart-row"><span>${escapeShop(item.name)} × ${qty}</span><strong>${rupees(item.price_paise*qty)}</strong><button type="button" class="text-button" onclick="removeShopItem(${id})">Remove</button></div>`:''}).join('');
   const subtotal=Object.entries(shopCart).reduce((sum,[id,qty])=>sum+(shopMenu.find(x=>x.id===Number(id))?.price_paise||0)*qty,0);
   const fee=subtotal?4900:0;
-  const orders=shopOrders.map(o=>`<article class="shop-order"><div class="shop-order-head"><strong>${escapeShop(o.order_code)}</strong><span class="order-status status-${o.status}">${o.status.replaceAll('_',' ')}</span></div><p>${o.items.map(i=>`${escapeShop(i.item_name)} × ${i.quantity}`).join(' · ')}</p><small>${o.payment_method==='cod'?'Cash on delivery':'Online payment'} · ${rupees(o.total_paise)} · ${new Date(o.created_at+'Z').toLocaleString()}</small>${isShopAdmin()?`<div class="shop-admin-actions"><select id="order-status-${o.id}">${['confirmed','preparing','ready_for_pickup','out_for_delivery','delivered','cancelled'].map(st=>`<option value="${st}" ${st===o.status?'selected':''}>${st.replaceAll('_',' ')}</option>`).join('')}</select><button class="btn secondary" onclick="updateShopOrder(${o.id})">Update status</button><small>Customer: ${escapeShop(o.customer_email||'')}</small></div>`:''}</article>`).join('');
-  return `<main class="shop-page"><div class="shop-heading"><div><p class="eyebrow">EATRIGHT KITCHEN</p><h1>Order balanced meals</h1><p>Freshly prepared by our kitchen and delivered in our pilot service area.</p></div><button class="btn secondary" onclick="goBackFromShop()">Back to my plan</button></div><div class="shop-layout"><section class="shop-menu"><h2>Today's menu</h2><div class="shop-items">${rows||'<p>Menu is being updated. Please check back soon.</p>'}</div></section><aside class="shop-checkout"><h2>Your cart</h2>${cartRows||'<p class="muted">Your cart is empty. Add a meal to get started.</p>'}<div class="shop-total"><span>Subtotal</span><strong>${rupees(subtotal)}</strong></div><div class="shop-total"><span>Delivery fee</span><strong>${rupees(fee)}</strong></div><div class="shop-total shop-grand"><span>Total</span><strong>${rupees(subtotal+fee)}</strong></div><form data-act="checkout" class="shop-form"><label>Delivery address<textarea name="address" required minlength="10" maxlength="500" placeholder="House/flat, street, area, city, PIN code"></textarea></label><label>Contact number<input name="phone" required type="tel" pattern="[+0-9()\\s-]{8,20}" placeholder="Phone number"></label><label>Delivery notes (optional)<input name="notes" maxlength="500" placeholder="Landmark or instructions"></label><label>Payment method<select name="payment_method"><option value="cod">Cash on delivery</option><option value="online">Online payment (gateway setup pending)</option></select></label><button class="btn primary" type="submit" ${subtotal?'':'disabled'}>Place order · ${rupees(subtotal+fee)}</button><small>Ordering is currently a pilot. A third-party courier connection and online payment gateway will be configured before live fulfilment.</small></form></aside></div><section class="shop-order-history"><h2>${isShopAdmin()?'All customer orders':'Your orders'}</h2>${orders||'<p class="muted">No orders yet.</p>'}</section></main>`;
+  const orders=shopOrders.map(o=>`<article class="shop-order"><div class="shop-order-head"><strong>${escapeShop(o.order_code)}</strong><span class="order-status status-${o.status}">${o.status.replaceAll('_',' ')}</span></div><p>${o.items.map(i=>`${escapeShop(i.item_name)} × ${i.quantity}`).join(' · ')}</p><small>${o.payment_method==='cod'?'Cash on delivery':'Online payment ('+o.payment_status+')'} · ${rupees(o.total_paise)} · ${new Date(o.created_at+'Z').toLocaleString()}</small>${(!isShopAdmin()&&o.payment_method==='online'&&['pending','failed'].includes(o.payment_status)&&o.status!=='cancelled')?`<button class="btn primary" onclick="payShopOrder(${o.id})">Pay now</button>`:''}${isShopAdmin()?`<div class="shop-admin-actions"><select id="order-status-${o.id}">${['confirmed','preparing','ready_for_pickup','out_for_delivery','delivered','cancelled'].map(st=>`<option value="${st}" ${st===o.status?'selected':''}>${st.replaceAll('_',' ')}</option>`).join('')}</select><button class="btn secondary" onclick="updateShopOrder(${o.id})">Update status</button><small>Customer: ${escapeShop(o.customer_email||'')}</small></div>`:''}</article>`).join('');
+  return `<main class="shop-page"><div class="shop-heading"><div><p class="eyebrow">EATRIGHT KITCHEN</p><h1>Order balanced meals</h1><p>Freshly prepared by our kitchen and delivered in our pilot service area.</p></div><button class="btn secondary" onclick="goBackFromShop()">Back to my plan</button></div><div class="shop-layout"><section class="shop-menu"><h2>Today's menu</h2><div class="shop-items">${rows||'<p>Menu is being updated. Please check back soon.</p>'}</div></section><aside class="shop-checkout"><h2>Your cart</h2>${cartRows||'<p class="muted">Your cart is empty. Add a meal to get started.</p>'}<div class="shop-total"><span>Subtotal</span><strong>${rupees(subtotal)}</strong></div><div class="shop-total"><span>Delivery fee</span><strong>${rupees(fee)}</strong></div><div class="shop-total shop-grand"><span>Total</span><strong>${rupees(subtotal+fee)}</strong></div><form data-act="checkout" class="shop-form"><label>Delivery address<textarea name="address" required minlength="10" maxlength="500" placeholder="House/flat, street, area, city, PIN code"></textarea></label><label>Contact number<input name="phone" required type="tel" pattern="[+0-9()\\s-]{8,20}" placeholder="Phone number"></label><label>Delivery notes (optional)<input name="notes" maxlength="500" placeholder="Landmark or instructions"></label><label>Payment method<select name="payment_method"><option value="cod">Cash on delivery</option>${onlinePaymentsEnabled?'<option value="online">Online payment (UPI, cards, netbanking)</option>':''}</select></label><button class="btn primary" type="submit" ${subtotal?'':'disabled'}>Place order · ${rupees(subtotal+fee)}</button><small>Ordering is currently a pilot. A third-party courier connection will be configured before live fulfilment.</small></form></aside></div><section class="shop-order-history"><h2>${isShopAdmin()?'All customer orders':'Your orders'}</h2>${orders||'<p class="muted">No orders yet.</p>'}</section></main>`;
 }
 function escapeShop(value){return String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function isShopAdmin(){return String(me?.email||'').toLowerCase()==='admin@eatright.co';}
@@ -4332,7 +4486,7 @@ const A = {
   async checkout(formData) {
     if (!Object.keys(shopCart).length) return alert('Your cart is empty.');
     const payload={items:Object.entries(shopCart).map(([id,quantity])=>({id:Number(id),quantity})),address:formData.get('address'),phone:formData.get('phone'),notes:formData.get('notes'),payment_method:formData.get('payment_method')};
-    try { const response=await fetch('/api/orders',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});const result=await response.json();if(!response.ok)throw new Error(result.error||'Could not place order.');shopCart={};if(pendingMealSlot!==null){const slot=pendingMealSlot;pendingMealSlot=null;if(!getJourneyProgress().meals[slot])await setProgress(slot,true);}alert(`${result.message}\nOrder reference: ${result.order_code}`);await openShop(); } catch(error){alert(error.message||'Could not place order.');}
+    try { const response=await fetch('/api/orders',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});const result=await response.json();if(!response.ok)throw new Error(result.error||'Could not place order.');shopCart={};let paid=!result.payment,note=result.message;if(result.payment){const outcome=await startRazorpayPayment(result.id,result.payment,{contact:payload.phone});paid=!!outcome.paid;note=paid?'Payment received. Thank you!':'Payment not completed. Your order is saved. Use "Pay now" under Your orders to finish it.'+(outcome.error?'\n'+outcome.error:'');}if(paid&&pendingMealSlot!==null){const slot=pendingMealSlot;pendingMealSlot=null;if(!getJourneyProgress().meals[slot])await setProgress(slot,true);}alert(`${note}\nOrder reference: ${result.order_code}`);await openShop(); } catch(error){alert(error.message||'Could not place order.');}
   },
 
   async auth(
