@@ -2570,3 +2570,5 @@ body.plan-locked { overflow: hidden; }
 .meal-option-desc { font-size: 13px; color: var(--text-soft); }
 .meal-option-facts { font-size: 12px; color: var(--text-muted); }
 .meal-option-other { border-style: dashed; }
+/* plan prices */
+.subscription-amount { margin: -8px 0 16px; font-size: 28px; font-weight: 800; letter-spacing: -0.03em; }
