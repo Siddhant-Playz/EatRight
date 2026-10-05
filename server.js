@@ -11,7 +11,10 @@ const DB_FILE = process.env.DB_PATH || path.join(__dirname, "stride.db");
 fs.mkdirSync(path.dirname(DB_FILE), { recursive: true });
 const db = new Database(DB_FILE);
 
-app.use(express.json({ limit: "1mb" }));
+app.use(express.json({
+  limit: "1mb",
+  verify: (req, res, buf) => { if (req.originalUrl.startsWith("/api/razorpay/webhook")) req.rawBody = buf; }
+}));
 /* SECURITY: never serve the database or server-side files to browsers. */
 app.use((req, res, next) => {
   const blocked = /\.(db|sqlite|sqlite3|sql|db-wal|db-shm)$|^\/(server\.js|meal-engine\.js|test-engine\.js|package(-lock)?\.json)$|^\/(node_modules|menu)(\/|$)/i;
@@ -1852,6 +1855,125 @@ app.get("/api/meal-plan", (req, res) => {
   });
   res.json(result);
 });
+/* ---------- Razorpay online payments ----------
+   Keys come ONLY from environment variables (Railway -> Variables), never from code:
+   RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET, and (for the webhook) RAZORPAY_WEBHOOK_SECRET. */
+// RAZORPAY-BEGIN
+const RZP_KEY_ID = (process.env.RAZORPAY_KEY_ID || "").trim();
+const RZP_KEY_SECRET = (process.env.RAZORPAY_KEY_SECRET || "").trim();
+const RZP_WEBHOOK_SECRET = (process.env.RAZORPAY_WEBHOOK_SECRET || "").trim();
+const razorpayEnabled = !!(RZP_KEY_ID && RZP_KEY_SECRET);
+if (razorpayEnabled) console.log(`Razorpay online payments enabled (${RZP_KEY_ID.startsWith("rzp_live") ? "LIVE" : "test"} mode).`);
+
+db.exec(`CREATE TABLE IF NOT EXISTS order_payments (
+  order_id INTEGER PRIMARY KEY REFERENCES orders(id) ON DELETE CASCADE,
+  razorpay_order_id TEXT NOT NULL UNIQUE,
+  razorpay_payment_id TEXT,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+)`);
+
+function hmacHex(secret, data) {
+  return crypto.createHmac("sha256", secret).update(data).digest("hex");
+}
+function safeEqualHex(a, b) {
+  const x = Buffer.from(String(a), "utf8"), y = Buffer.from(String(b), "utf8");
+  return x.length === y.length && crypto.timingSafeEqual(x, y);
+}
+async function rzpRequest(apiPath, method, body) {
+  const auth = Buffer.from(`${RZP_KEY_ID}:${RZP_KEY_SECRET}`).toString("base64");
+  const response = await fetch(`https://api.razorpay.com/v1${apiPath}`, {
+    method,
+    headers: { Authorization: `Basic ${auth}`, "Content-Type": "application/json" },
+    body: body ? JSON.stringify(body) : undefined,
+    signal: AbortSignal.timeout(15000)
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error((data.error && data.error.description) || "Payment gateway error.");
+  return data;
+}
+/* Creates (or reuses) the Razorpay order for one of our orders and returns what the browser needs. */
+async function ensureRazorpayOrder(order) {
+  const read = () => db.prepare("SELECT razorpay_order_id FROM order_payments WHERE order_id = ?").get(order.id);
+  let existing = read();
+  if (!existing) {
+    const created = await rzpRequest("/orders", "POST", {
+      amount: order.total_paise, currency: "INR", receipt: order.order_code,
+      notes: { order_code: order.order_code }
+    });
+    db.prepare("INSERT OR IGNORE INTO order_payments (order_id, razorpay_order_id) VALUES (?, ?)").run(order.id, created.id);
+    existing = read();
+  }
+  return {
+    key_id: RZP_KEY_ID, order_id: existing.razorpay_order_id, amount: order.total_paise,
+    currency: "INR", name: "EatRight", description: `Order ${order.order_code}`
+  };
+}
+function markOrderPaid(orderId, paymentId) {
+  db.prepare("UPDATE orders SET payment_status = 'paid' WHERE id = ? AND payment_status IN ('pending','failed')").run(orderId);
+  if (paymentId) db.prepare("UPDATE order_payments SET razorpay_payment_id = ? WHERE order_id = ?").run(String(paymentId), orderId);
+}
+
+app.get("/api/payment-config", (req, res) => res.json({ online: razorpayEnabled }));
+
+/* Start (or retry) payment for an unpaid online order that belongs to the signed-in customer. */
+app.post("/api/orders/:id/payment-session", async (req, res) => {
+  const user = requireUser(req, res); if (!user) return;
+  if (!razorpayEnabled) return res.status(503).json({ error: "Online payment isn't available right now." });
+  const order = db.prepare("SELECT id, order_code, total_paise, status, payment_method, payment_status FROM orders WHERE id = ? AND user_id = ?")
+    .get(Number(req.params.id), user.id);
+  if (!order) return res.status(404).json({ error: "Order not found." });
+  if (order.payment_method !== "online" || !["pending", "failed"].includes(order.payment_status) || order.status === "cancelled") {
+    return res.status(409).json({ error: "This order doesn't need a payment." });
+  }
+  try {
+    res.json(await ensureRazorpayOrder(order));
+  } catch (error) {
+    console.error("RAZORPAY SESSION ERROR:", error.message);
+    res.status(502).json({ error: "Online payment could not be started. Please try again." });
+  }
+});
+
+/* The browser reports a finished payment; we only believe it if the signature matches our secret. */
+app.post("/api/orders/:id/verify-payment", (req, res) => {
+  const user = requireUser(req, res); if (!user) return;
+  if (!razorpayEnabled) return res.status(503).json({ error: "Online payment isn't available right now." });
+  const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body || {};
+  const fields = [razorpay_order_id, razorpay_payment_id, razorpay_signature];
+  if (!fields.every(v => typeof v === "string" && v.length > 0 && v.length <= 100)) {
+    return res.status(400).json({ error: "Payment details are missing." });
+  }
+  const row = db.prepare(`SELECT o.id, p.razorpay_order_id FROM orders o
+      JOIN order_payments p ON p.order_id = o.id WHERE o.id = ? AND o.user_id = ?`).get(Number(req.params.id), user.id);
+  if (!row || row.razorpay_order_id !== razorpay_order_id) return res.status(404).json({ error: "Order not found." });
+  const expected = hmacHex(RZP_KEY_SECRET, `${razorpay_order_id}|${razorpay_payment_id}`);
+  if (!safeEqualHex(expected, razorpay_signature)) {
+    return res.status(400).json({ error: "Payment could not be verified. If money was deducted, contact us with your order number." });
+  }
+  markOrderPaid(row.id, razorpay_payment_id);
+  res.json({ success: true, payment_status: "paid" });
+});
+
+/* Razorpay calls this itself, so payments are recorded even if the customer closes the page. */
+app.post("/api/razorpay/webhook", (req, res) => {
+  if (!RZP_WEBHOOK_SECRET || !req.rawBody) return res.status(503).end();
+  const signature = req.get("x-razorpay-signature") || "";
+  if (!safeEqualHex(hmacHex(RZP_WEBHOOK_SECRET, req.rawBody), signature)) return res.status(400).end();
+  const event = req.body || {};
+  const payload = event.payload || {};
+  const payment = payload.payment && payload.payment.entity;
+  const rzpOrderId = (payment && payment.order_id) || (payload.order && payload.order.entity && payload.order.entity.id);
+  const row = rzpOrderId && db.prepare("SELECT order_id FROM order_payments WHERE razorpay_order_id = ?").get(rzpOrderId);
+  if (row) {
+    if (event.event === "payment.captured" || event.event === "order.paid") {
+      markOrderPaid(row.order_id, payment && payment.id);
+    } else if (event.event === "payment.failed") {
+      db.prepare("UPDATE orders SET payment_status = 'failed' WHERE id = ? AND payment_status = 'pending'").run(row.order_id);
+    }
+  }
+  res.json({ received: true });
+});
+// RAZORPAY-END
+
 app.get("/api/orders", (req, res) => {
   const user = requireUser(req, res); if (!user) return;
   const orders = isAdmin(user)
@@ -1860,12 +1982,13 @@ app.get("/api/orders", (req, res) => {
   const getItems = db.prepare("SELECT item_name,unit_price_paise,quantity FROM order_items WHERE order_id=?");
   res.json(orders.map(o => ({...o, items:getItems.all(o.id)})));
 });
-app.post("/api/orders", (req, res) => {
+app.post("/api/orders", async (req, res) => {
   const user = requireUser(req, res); if (!user) return;
   try {
     const {items,payment_method,address,phone,notes=""} = req.body || {};
     if (!Array.isArray(items) || !items.length || items.length > 30) return res.status(400).json({error:"Add at least one menu item."});
     if (!['cod','online'].includes(payment_method)) return res.status(400).json({error:"Choose a valid payment method."});
+    if (payment_method === 'online' && !razorpayEnabled) return res.status(400).json({error:"Online payment isn't available right now. Please choose cash on delivery."});
     const cleanAddress=String(address||'').trim(), cleanPhone=String(phone||'').trim();
     if (cleanAddress.length < 10 || cleanAddress.length > 500) return res.status(400).json({error:"Enter a complete delivery address."});
     if (!/^[+\d()\-\s]{8,20}$/.test(cleanPhone)) return res.status(400).json({error:"Enter a valid contact number."});
@@ -1893,7 +2016,18 @@ app.post("/api/orders", (req, res) => {
       return result.lastInsertRowid;
     });
     const id=create();
-    res.status(201).json({success:true,id,order_code:orderCode,message:payment_method==='online'?'Order saved. Online payment gateway setup is the next integration step; no payment has been charged.':'Order placed. Pay cash on delivery.'});
+    let payment=null;
+    if (payment_method==='online') {
+      try {
+        payment=await ensureRazorpayOrder({id,order_code:orderCode,total_paise:total});
+      } catch(err) {
+        // Nothing has been charged, so drop the unpaid order instead of leaving a stray record.
+        db.prepare("DELETE FROM orders WHERE id=?").run(id);
+        console.error("RAZORPAY ORDER ERROR:", err.message);
+        return res.status(502).json({error:"Online payment could not be started. Please try again or choose cash on delivery."});
+      }
+    }
+    res.status(201).json({success:true,id,order_code:orderCode,payment_method,payment,message:payment_method==='online'?'Order saved. Complete the payment to confirm it.':'Order placed. Pay cash on delivery.'});
   } catch(error) { res.status(400).json({error:error.message||"Could not place order."}); }
 });
 app.patch("/api/admin/orders/:id/status", (req,res)=>{
